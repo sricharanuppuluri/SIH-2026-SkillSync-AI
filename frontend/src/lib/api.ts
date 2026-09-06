@@ -409,3 +409,22 @@ export const jobAPI = {
     return fetchAPI<import("@/types").Job>(`/api/v1/jobs/${jobId}`);
   },
 };
+
+/**
+ * Semantic Skill Matching and Embedding API methods (Phase 9).
+ */
+export const semanticSkillAPI = {
+  async match(
+    payload: import("@/types").SemanticMatchRequest
+  ): Promise<import("@/types").SemanticMatchResponse> {
+    return fetchAPI<import("@/types").SemanticMatchResponse>("/api/v1/skills/semantic-match", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async getStatus(): Promise<import("@/types").EmbeddingStatusResponse> {
+    return fetchAPI<import("@/types").EmbeddingStatusResponse>("/api/v1/skills/embeddings/status");
+  },
+};
+

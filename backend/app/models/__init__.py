@@ -22,6 +22,7 @@ from app.models.skill import (
     SkillStatus,
     SkillType,
 )
+from app.models.skill_embedding import SkillEmbedding
 from app.models.user import User, UserRole
 
 __all__ = [
@@ -47,6 +48,7 @@ __all__ = [
     "ProficiencyLevel",
     "Skill",
     "SkillAlias",
+    "SkillEmbedding",
     "SkillRelationship",
     "SkillRelationshipType",
     "SkillStatus",

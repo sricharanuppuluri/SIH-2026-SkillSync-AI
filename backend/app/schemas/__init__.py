@@ -74,6 +74,13 @@ from app.schemas.profiles import (
     TrainingProviderProfileResponse,
     TrainingProviderProfileUpdate,
 )
+from app.schemas.semantic import (
+    EmbeddingStatusResponse,
+    MatchType,
+    SemanticMatchItem,
+    SemanticMatchRequest,
+    SemanticMatchResponse,
+)
 from app.schemas.skill import (
     SkillAliasCreate,
     SkillAliasResponse,
@@ -129,6 +136,7 @@ __all__ = [
     "EmployerProfileUpdate",
     "EmployerRecentApplicationItem",
     "EmployerRecentJobItem",
+    "EmbeddingStatusResponse",
     "EnrollmentCreate",
     "EnrollmentResponse",
     "EnrollmentUpdate",
@@ -142,7 +150,11 @@ __all__ = [
     "JobSkillRequirement",
     "JobSkillResponse",
     "JobUpdate",
+    "MatchType",
     "ProfileCompletenessResponse",
+    "SemanticMatchItem",
+    "SemanticMatchRequest",
+    "SemanticMatchResponse",
     "SkillAliasCreate",
     "SkillAliasResponse",
     "SkillCatalogItem",

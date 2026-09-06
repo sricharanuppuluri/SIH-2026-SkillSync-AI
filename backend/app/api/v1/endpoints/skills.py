@@ -10,6 +10,11 @@ from app.core.database import get_db
 from app.core.deps import get_optional_current_user, require_authenticated_user, require_roles
 from app.models.skill import SkillStatus, SkillType
 from app.models.user import User, UserRole
+from app.schemas.semantic import (
+    EmbeddingStatusResponse,
+    SemanticMatchRequest,
+    SemanticMatchResponse,
+)
 from app.schemas.skill import (
     SkillAliasCreate,
     SkillAliasResponse,
@@ -23,6 +28,7 @@ from app.schemas.skill import (
 )
 from app.schemas.skill_extraction import SkillExtractionRequest, SkillExtractionResponse
 from app.services import skill_extraction_service, skill_service
+from app.services.semantic_skill_service import semantic_skill_service
 
 router = APIRouter()
 
@@ -401,3 +407,46 @@ async def extract_skills_from_text(
         text=payload.text,
         source_type=payload.source_type,
     )
+
+
+# ---------------------------------------------------------------------------
+# Phase 9: Embeddings & Semantic Skill Matching
+# ---------------------------------------------------------------------------
+
+
+@router.post(
+    "/semantic-match",
+    response_model=SemanticMatchResponse,
+    summary="Semantic skill matching with exact/alias precedence (Phase 9)",
+    description=(
+        "Matches raw skill text against canonical skills using multi-tier resolution: "
+        "1. Exact canonical name match (1.0), "
+        "2. Canonical alias match (1.0), "
+        "3. Local Sentence Transformers vector embedding similarity via pgvector. "
+        "Requires authentication. Internal 384-dimensional vectors are never exposed."
+    ),
+)
+async def semantic_skill_match(
+    payload: SemanticMatchRequest,
+    db: AsyncSession = Depends(get_db),
+    _current_user: User = Depends(require_authenticated_user),
+) -> SemanticMatchResponse:
+    """Find matching canonical skills for query text using multi-tier resolution.
+
+    Accessible to all authenticated roles: CANDIDATE, EMPLOYER,
+    TRAINING_PROVIDER, GOVERNMENT, ADMIN.
+    """
+    return await semantic_skill_service.match_skill(db=db, request=payload)
+
+
+@router.get(
+    "/embeddings/status",
+    response_model=EmbeddingStatusResponse,
+    summary="Get canonical skill embedding status and coverage metrics (Admin only)",
+)
+async def get_embeddings_status(
+    db: AsyncSession = Depends(get_db),
+    _user: User = Depends(require_roles(UserRole.ADMIN)),
+) -> EmbeddingStatusResponse:
+    """Retrieve catalog embedding coverage and model health. Restricted to ADMIN."""
+    return await semantic_skill_service.get_embedding_status(db=db)

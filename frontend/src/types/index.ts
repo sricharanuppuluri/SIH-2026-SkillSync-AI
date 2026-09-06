@@ -2,6 +2,7 @@ export * from "./auth";
 export * from "./candidate";
 export * from "./employer";
 export * from "./extraction";
+export * from "./semantic";
 export * from "./skill";
 export * from "./skillGap";
 
