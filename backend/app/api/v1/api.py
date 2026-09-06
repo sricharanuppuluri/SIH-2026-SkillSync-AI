@@ -8,6 +8,7 @@ from app.api.v1.endpoints import (
     candidate_learning,
     copilot,
     courses,
+    demand,
     employer,
     health,
     jobs,
@@ -52,3 +53,8 @@ api_router.include_router(
 
 # Phase 12: Verified Skill Passport Endpoints
 api_router.include_router(passport.router, tags=["Verified Skill Passport"])
+
+# Phase 13: Skill Demand Digital Twin Endpoints
+api_router.include_router(
+    demand.router, prefix="/demand", tags=["Skill Demand Digital Twin"]
+)
