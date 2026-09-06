@@ -25,9 +25,27 @@ from app.schemas.candidate import (
     CandidateSkillUpdate,
     ProfileCompletenessResponse,
 )
-from app.services import candidate_service
+from app.schemas.skill_gap import SkillGapReport
+from app.services import candidate_service, skill_gap_service
 
 router = APIRouter()
+
+
+# ---------------------------------------------------------------------------
+# Skill Gap Analysis
+# ---------------------------------------------------------------------------
+@router.get(
+    "/jobs/{job_id}/skill-gap",
+    response_model=SkillGapReport,
+    summary="Get deterministic skill gap analysis for a specific job",
+)
+async def get_job_skill_gap(
+    job_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_roles(UserRole.CANDIDATE, UserRole.ADMIN)),
+) -> SkillGapReport:
+    """Evaluate candidate competencies against target job requirements deterministically."""
+    return await skill_gap_service.calculate_job_skill_gap(db, current_user, job_id)
 
 
 # ---------------------------------------------------------------------------

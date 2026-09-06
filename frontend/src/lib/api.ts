@@ -396,3 +396,16 @@ export const employerAPI = {
     });
   },
 };
+
+/**
+ * Public Job Requisition API methods.
+ */
+export const jobAPI = {
+  async listJobs(): Promise<import("@/types").Job[]> {
+    return fetchAPI<import("@/types").Job[]>("/api/v1/jobs");
+  },
+
+  async getJob(jobId: string): Promise<import("@/types").Job> {
+    return fetchAPI<import("@/types").Job>(`/api/v1/jobs/${jobId}`);
+  },
+};

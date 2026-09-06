@@ -20,6 +20,7 @@ import {
   CandidateSkillUpdateData,
   ProfileCompleteness,
 } from "@/types/candidate";
+import { SkillGapReport } from "@/types/skillGap";
 
 export const candidateAPI = {
   // Dashboard & Completeness
@@ -136,5 +137,10 @@ export const candidateAPI = {
     return fetchAPI<CandidateResumeResponse>("/api/v1/candidate/resume", {
       method: "DELETE",
     });
+  },
+
+  // Skill Gap Engine
+  getJobSkillGap: async (jobId: string): Promise<SkillGapReport> => {
+    return fetchAPI<SkillGapReport>(`/api/v1/candidate/jobs/${jobId}/skill-gap`);
   },
 };

@@ -85,6 +85,13 @@ from app.schemas.skill import (
     SkillResponse,
     SkillUpdate,
 )
+from app.schemas.skill_gap import (
+    GapSeverity,
+    SkillGapItem,
+    SkillGapReport,
+    SkillGapStatus,
+    SkillGapSummary,
+)
 
 __all__ = [
     "ApplicationCreate",
@@ -125,6 +132,7 @@ __all__ = [
     "EnrollmentCreate",
     "EnrollmentResponse",
     "EnrollmentUpdate",
+    "GapSeverity",
     "GovernmentProfileCreate",
     "GovernmentProfileResponse",
     "GovernmentProfileUpdate",
@@ -140,6 +148,10 @@ __all__ = [
     "SkillCatalogItem",
     "SkillCreate",
     "SkillDetailResponse",
+    "SkillGapItem",
+    "SkillGapReport",
+    "SkillGapStatus",
+    "SkillGapSummary",
     "SkillRelationshipCreate",
     "SkillRelationshipResponse",
     "SkillResponse",

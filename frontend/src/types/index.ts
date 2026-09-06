@@ -3,6 +3,7 @@ export * from "./candidate";
 export * from "./employer";
 export * from "./extraction";
 export * from "./skill";
+export * from "./skillGap";
 
 export interface DatabaseHealth {
   status: "connected" | "disconnected" | "degraded";
