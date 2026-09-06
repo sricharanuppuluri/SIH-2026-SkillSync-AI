@@ -20,6 +20,7 @@ from app.models.enrollment import Enrollment, EnrollmentStatus
 from app.models.job import Job, JobSkill
 from app.models.profiles import CandidateProfile
 from app.models.user import User
+from app.models.verified_skill import VerificationStatus, VerifiedSkill
 from app.schemas.skill_gap import SkillGapReport
 from app.services import candidate_service, skill_gap_service
 
@@ -52,7 +53,7 @@ class CareerContextService:
             await candidate_service.get_or_create_candidate_profile(db, current_user)
         )
 
-        # 2. Fetch Candidate Skills
+        # 2. Fetch Candidate Skills and Verified Skills
         cand_skills_stmt = (
             select(CandidateSkill)
             .options(selectinload(CandidateSkill.skill))
@@ -61,6 +62,15 @@ class CareerContextService:
         )
         cand_skills_res = await db.execute(cand_skills_stmt)
         cand_skills = cand_skills_res.scalars().all()
+
+        vs_stmt = (
+            select(VerifiedSkill)
+            .options(selectinload(VerifiedSkill.skill))
+            .where(VerifiedSkill.candidate_id == candidate_profile.id)
+            .order_by(VerifiedSkill.created_at.desc())
+        )
+        vs_res = await db.execute(vs_stmt)
+        verified_skill_records = vs_res.scalars().all()
 
         # 3. Fetch Candidate Education (bounded)
         cand_edu_stmt = (
@@ -201,6 +211,7 @@ class CareerContextService:
         formatted_context = self._format_trusted_context(
             candidate_profile=candidate_profile,
             cand_skills=cand_skills,
+            verified_skills=verified_skill_records,
             cand_educations=cand_educations,
             cand_experiences=cand_experiences,
             enrolled_courses=enrolled_courses,
@@ -223,6 +234,7 @@ class CareerContextService:
         self,
         candidate_profile: CandidateProfile,
         cand_skills: list[CandidateSkill],
+        verified_skills: list[VerifiedSkill],
         cand_educations: list[CandidateEducation],
         cand_experiences: list[CandidateExperience],
         enrolled_courses: list[dict[str, Any]],
@@ -256,20 +268,51 @@ class CareerContextService:
             )
         sections.append("\n".join(profile_lines))
 
-        # Candidate Skills Section
-        skills_lines = ["### CANDIDATE RECORDED SKILLS (AUTHORITATIVE)"]
+        # Separate Verified Skills from Unverified Skills
+        verified_items = [
+            vs for vs in verified_skills if vs.verification_status == VerificationStatus.VERIFIED
+        ]
+        unverified_items = [
+            vs for vs in verified_skills if vs.verification_status != VerificationStatus.VERIFIED
+        ]
+
+        verified_skill_ids = {vs.skill_id for vs in verified_items}
+
+        # Format Verified Skills Section
+        verified_lines = ["### CANDIDATE VERIFIED SKILLS (EVIDENCE-BACKED COMPETENCY)"]
+        if verified_items:
+            for vs in verified_items:
+                sk_name = vs.skill.name if vs.skill else "Skill"
+                verified_lines.append(f"- {sk_name} | {vs.verification_summary}")
+        else:
+            verified_lines.append("- No verified skills currently on record.")
+        sections.append("\n".join(verified_lines))
+
+        # Format Unverified / Self-Declared Skills Section
+        unverified_lines = ["### CANDIDATE UNVERIFIED / SELF-DECLARED SKILLS"]
+        unverified_found = False
         if cand_skills:
             for cs in cand_skills:
-                skill_name = cs.skill.name if cs.skill else "Unknown"
-                prof = cs.proficiency.value if hasattr(cs.proficiency, "value") else cs.proficiency
-                verified_str = "Verified" if cs.is_verified else "Self-reported"
-                exp_s = f"{cs.years_experience} yrs"
-                skills_lines.append(
-                    f"- {skill_name} | Level: {prof} | Experience: {exp_s} ({verified_str})"
-                )
-        else:
-            skills_lines.append("- No skills currently recorded in profile.")
-        sections.append("\n".join(skills_lines))
+                if cs.skill_id not in verified_skill_ids:
+                    unverified_found = True
+                    skill_name = cs.skill.name if cs.skill else "Unknown"
+                    prof = (
+                        cs.proficiency.value if hasattr(cs.proficiency, "value") else cs.proficiency
+                    )
+                    exp_s = f"{cs.years_experience} yrs"
+                    unverified_lines.append(
+                        f"- {skill_name} | Level: {prof} | Experience: {exp_s} "
+                        "(Self-Declared / Unverified)"
+                    )
+        for uvs in unverified_items:
+            if not any(cs.skill_id == uvs.skill_id for cs in cand_skills):
+                unverified_found = True
+                sk_name = uvs.skill.name if uvs.skill else "Skill"
+                unverified_lines.append(f"- {sk_name} | ({uvs.verification_summary})")
+
+        if not unverified_found:
+            unverified_lines.append("- No additional unverified skills.")
+        sections.append("\n".join(unverified_lines))
 
         # Candidate Enrolled Courses Section
         if enrolled_courses:

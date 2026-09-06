@@ -228,7 +228,9 @@ async def test_semantic_fallback_and_thresholding() -> None:
         await session.commit()
 
         # Query using a semantic phrase that isn't an exact name or alias
-        req = SemanticMatchRequest(text="Kubernetes and container orchestration", top_k=5)
+        req = SemanticMatchRequest(
+            text=f"Kubernetes and container orchestration {suffix}", top_k=10
+        )
         res = await semantic_skill_service.match_skill(session, req)
 
         assert len(res.matches) >= 1

@@ -25,6 +25,8 @@ if TYPE_CHECKING:
     from app.models.course import CourseSkill
     from app.models.job import JobSkill
     from app.models.skill_embedding import SkillEmbedding
+    from app.models.skill_evidence import SkillEvidence
+    from app.models.verified_skill import VerifiedSkill
 
 
 class SkillType(enum.StrEnum):
@@ -140,6 +142,12 @@ class Skill(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     )
     embeddings: Mapped[list["SkillEmbedding"]] = relationship(
         "SkillEmbedding", back_populates="skill", cascade="all, delete-orphan"
+    )
+    evidences: Mapped[list["SkillEvidence"]] = relationship(
+        "SkillEvidence", back_populates="skill", cascade="all, delete-orphan"
+    )
+    verified_skills: Mapped[list["VerifiedSkill"]] = relationship(
+        "VerifiedSkill", back_populates="skill", cascade="all, delete-orphan"
     )
 
     def __repr__(self) -> str:

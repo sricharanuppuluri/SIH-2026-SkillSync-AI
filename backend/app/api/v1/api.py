@@ -11,6 +11,7 @@ from app.api.v1.endpoints import (
     employer,
     health,
     jobs,
+    passport,
     profiles,
     rbac_test,
     skills,
@@ -48,3 +49,6 @@ api_router.include_router(
 api_router.include_router(
     candidate_learning.router, prefix="/candidate/learning", tags=["Candidate Learning Module"]
 )
+
+# Phase 12: Verified Skill Passport Endpoints
+api_router.include_router(passport.router, tags=["Verified Skill Passport"])
