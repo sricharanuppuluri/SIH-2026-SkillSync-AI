@@ -1,4 +1,4 @@
-"""Skill taxonomy and canonical intelligence endpoints."""
+"""Skill taxonomy, canonical intelligence, and AI extraction endpoints."""
 
 import uuid
 
@@ -7,7 +7,7 @@ from sqlalchemy import inspect
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.core.deps import get_optional_current_user, require_roles
+from app.core.deps import get_optional_current_user, require_authenticated_user, require_roles
 from app.models.skill import SkillStatus, SkillType
 from app.models.user import User, UserRole
 from app.schemas.skill import (
@@ -21,7 +21,8 @@ from app.schemas.skill import (
     SkillResponse,
     SkillUpdate,
 )
-from app.services import skill_service
+from app.schemas.skill_extraction import SkillExtractionRequest, SkillExtractionResponse
+from app.services import skill_extraction_service, skill_service
 
 router = APIRouter()
 
@@ -363,3 +364,40 @@ async def delete_skill_relationship(
 ) -> None:
     """Delete a skill relationship. Restricted to ADMIN."""
     await skill_service.delete_skill_relationship(db, skill_id, relationship_id)
+
+
+# ---------------------------------------------------------------------------
+# Phase 6: Local AI Skill Extraction
+# ---------------------------------------------------------------------------
+
+
+@router.post(
+    "/extract",
+    response_model=SkillExtractionResponse,
+    summary="Extract skills from text using local AI (Phase 6)",
+    description=(
+        "Accepts unstructured source text (job description, resume, course description, etc.) "
+        "and uses a locally running Ollama LLM to extract skill mentions. "
+        "Results are deterministically resolved against the canonical Phase 5 skill catalog. "
+        "Requires authentication. Model and server configuration are server-side only. "
+        "If Ollama is unavailable, returns success=false with appropriate warnings."
+    ),
+)
+async def extract_skills_from_text(
+    payload: SkillExtractionRequest,
+    db: AsyncSession = Depends(get_db),
+    _current_user: User = Depends(require_authenticated_user),
+) -> SkillExtractionResponse:
+    """Extract skills from source text using the local Ollama LLM.
+
+    Accessible to all authenticated roles: ADMIN, EMPLOYER, CANDIDATE,
+    TRAINING_PROVIDER, GOVERNMENT.
+
+    The Ollama model and base URL are server-side configuration only.
+    The caller cannot override the model or endpoint.
+    """
+    return await skill_extraction_service.extract_skills(
+        db=db,
+        text=payload.text,
+        source_type=payload.source_type,
+    )
