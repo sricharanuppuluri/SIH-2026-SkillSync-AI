@@ -31,6 +31,14 @@ from app.schemas.candidate import (
 from app.schemas.candidate import (
     CandidateProfileUpdate as CandidateProfileUpdateRequest,
 )
+from app.schemas.career_copilot import (
+    CareerCopilotChatResult,
+    CareerCopilotRequest,
+    CareerCopilotResponse,
+    CopilotConversationResponse,
+    CopilotConversationSummary,
+    CopilotMessageResponse,
+)
 from app.schemas.course import (
     CourseCreate,
     CourseResponse,
@@ -121,6 +129,12 @@ __all__ = [
     "CandidateSkillCreate",
     "CandidateSkillResponse",
     "CandidateSkillUpdate",
+    "CareerCopilotChatResult",
+    "CareerCopilotRequest",
+    "CareerCopilotResponse",
+    "CopilotConversationResponse",
+    "CopilotConversationSummary",
+    "CopilotMessageResponse",
     "CourseCreate",
     "CourseResponse",
     "CourseSkillRequirement",

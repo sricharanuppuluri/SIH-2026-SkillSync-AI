@@ -5,6 +5,7 @@ from fastapi import APIRouter
 from app.api.v1.endpoints import (
     auth,
     candidate,
+    copilot,
     courses,
     employer,
     health,
@@ -34,3 +35,6 @@ api_router.include_router(employer.router, prefix="/employer", tags=["Employer M
 
 # Phase 7: Candidate Module Endpoints
 api_router.include_router(candidate.router, prefix="/candidate", tags=["Candidate Module"])
+
+# Phase 10: AI Career Copilot Endpoints
+api_router.include_router(copilot.router, prefix="/candidate/copilot", tags=["AI Career Copilot"])

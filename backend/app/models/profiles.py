@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from app.models.candidate_education import CandidateEducation
     from app.models.candidate_experience import CandidateExperience
     from app.models.candidate_skill import CandidateSkill
+    from app.models.copilot_conversation import CopilotConversation
     from app.models.course import Course
     from app.models.enrollment import Enrollment
     from app.models.job import Job
@@ -65,6 +66,9 @@ class CandidateProfile(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     )
     enrollments: Mapped[list["Enrollment"]] = relationship(
         "Enrollment", back_populates="candidate", cascade="all, delete-orphan"
+    )
+    copilot_conversations: Mapped[list["CopilotConversation"]] = relationship(
+        "CopilotConversation", back_populates="candidate", cascade="all, delete-orphan"
     )
 
     def __repr__(self) -> str:

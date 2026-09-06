@@ -16,6 +16,7 @@ import {
   Building2,
   User as UserIcon,
   Sparkles,
+  Bot,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -36,6 +37,12 @@ export const navItems: NavItem[] = [
     title: "Dashboard",
     href: "/dashboard",
     icon: LayoutDashboard,
+    status: "available",
+  },
+  {
+    title: "Career Copilot",
+    href: "/candidate/copilot",
+    icon: Bot,
     status: "available",
   },
   {
@@ -136,6 +143,7 @@ export const navItems: NavItem[] = [
 export const ROLE_NAV_PERMISSIONS: Record<UserRole, string[]> = {
   CANDIDATE: [
     "/dashboard",
+    "/candidate/copilot",
     "/candidate/profile",
     "/candidate/skills",
     "/candidate/experience",
@@ -173,6 +181,7 @@ export const ROLE_NAV_PERMISSIONS: Record<UserRole, string[]> = {
   ],
   ADMIN: [
     "/dashboard",
+    "/candidate/copilot",
     "/candidate/profile",
     "/candidate/skills",
     "/candidate/experience",

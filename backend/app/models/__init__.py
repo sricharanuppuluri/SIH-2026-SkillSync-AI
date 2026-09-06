@@ -5,6 +5,7 @@ from app.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 from app.models.candidate_education import CandidateEducation
 from app.models.candidate_experience import CandidateExperience
 from app.models.candidate_skill import CandidateSkill, ProficiencyLevel
+from app.models.copilot_conversation import CopilotConversation, CopilotMessage
 from app.models.course import Course, CourseMode, CourseSkill
 from app.models.enrollment import Enrollment, EnrollmentStatus
 from app.models.job import EmploymentType, ExperienceLevel, Job, JobSkill, JobStatus
@@ -33,6 +34,8 @@ __all__ = [
     "CandidateExperience",
     "CandidateProfile",
     "CandidateSkill",
+    "CopilotConversation",
+    "CopilotMessage",
     "Course",
     "CourseMode",
     "CourseSkill",
