@@ -11,7 +11,7 @@ The architecture is built on a **Modular Monolith** pattern:
                         │    Next.js Frontend    │
                         │ (TypeScript + Tailwind)│
                         └───────────┬────────────┘
-                                    │ REST / JSON
+                                    │ REST / JSON (JWT Bearer)
                                     ▼
                         ┌────────────────────────┐
                         │    FastAPI Backend     │
@@ -46,19 +46,20 @@ Rather than prematurely adopting distributed microservices, SkillSync AI leverag
 ## 3. Core Architectural Layers
 
 ### 3.1 Frontend Layer (Next.js)
-- **Framework**: Next.js (App Router), React, TypeScript.
+- **Framework**: Next.js 15 (App Router), React 19, TypeScript.
 - **Styling**: Tailwind CSS, shadcn/ui design patterns, Lucide icons.
-- **State & Data Fetching**: Typed API abstractions (`src/lib/api.ts`), dynamic client components, server components for pre-rendering where appropriate.
-- **Dynamic-First Principle**: Dashboards and metric cards consume live backend REST APIs rather than hardcoding static mock numbers.
+- **Authentication**: `AuthProvider` and `useAuth()` centralized React context with token persistence in `localStorage`.
+- **Role-Aware Navigation**: Nav items dynamically filtered based on authenticated user's RBAC role (`CANDIDATE`, `EMPLOYER`, `TRAINING_PROVIDER`, `GOVERNMENT`, `ADMIN`).
 
 ### 3.2 API & Application Layer (FastAPI)
 - **Framework**: FastAPI with Python async handlers (`asyncio`).
 - **Data Validation & Schemas**: Pydantic v2 schemas for request validation and response serialization.
-- **Routing**: Versioned routers mounted under `/api/v1/`.
-- **Dependency Injection**: Reusable dependencies for database sessions (`get_db`), Redis clients, and authentication contexts.
+- **Authentication & Security**: Bcrypt salted password hashing, JWT bearer token verification (`python-jose`), and reusable dependency injection (`get_current_user`, `require_authenticated_user`, `require_roles`).
+- **Anti-Privilege Escalation**: Public registration rejects unauthorized privilege escalation (`ADMIN` role assignment).
 
 ### 3.3 Persistence & Vector Search (PostgreSQL + pgvector)
 - **ORM & Migrations**: SQLAlchemy 2.0 (async engine) + Alembic.
+- **Identity & RBAC Schema**: `users` table with UUID primary key, indexed unique email, salted password hash, `user_role` enum, and active status flag.
 - **Relational Data**: Candidates, employers, job requisitions, courses, skill taxonomy, application records.
 - **Vector Search (`pgvector`)**: Stores high-dimensional embeddings for candidate resumes, job descriptions, and skill taxonomy definitions to power semantic similarity matching without proprietary third-party vector databases.
 

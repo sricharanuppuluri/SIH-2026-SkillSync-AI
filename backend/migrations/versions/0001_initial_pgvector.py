@@ -19,11 +19,17 @@ depends_on: str | Sequence[str] | None = None
 def upgrade() -> None:
     # Enable pgvector extension if available in the PostgreSQL environment
     from sqlalchemy import text
+
     bind = op.get_bind()
     try:
-        bind.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
+        check_sql = text("SELECT 1 FROM pg_available_extensions WHERE name = 'vector'")
+        has_vector = bind.execute(check_sql).scalar()
+        if has_vector:
+            bind.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
+        else:
+            print("[NOTE] pgvector extension not present in local PostgreSQL instance.")
     except Exception as e:
-        print(f"[NOTE] pgvector extension not present in local PostgreSQL instance: {e}")
+        print(f"[NOTE] pgvector check note: {e}")
 
 
 def downgrade() -> None:

@@ -1,3 +1,5 @@
+export * from "./auth";
+
 export interface DatabaseHealth {
   status: "connected" | "disconnected" | "degraded";
   latency_ms?: number;

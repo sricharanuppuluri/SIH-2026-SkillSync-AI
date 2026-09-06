@@ -2,15 +2,18 @@
 
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import health
+from app.api.v1.endpoints import auth, health, rbac_test
 
 api_router = APIRouter()
 
 # Phase 0: System Health & Diagnostics
 api_router.include_router(health.router, tags=["Health"])
 
+# Phase 2: Authentication & RBAC
+api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
+api_router.include_router(rbac_test.router, tags=["RBAC Verification"])
+
 # Future Phase Modules (Ready to be mounted):
-# api_router.include_router(auth.router, prefix="/auth", tags=["Authentication & RBAC"])
 # api_router.include_router(jobs.router, prefix="/jobs", tags=["Employer Jobs"])
 # api_router.include_router(candidates.router, prefix="/candidates", tags=["Candidate Profiles"])
 # api_router.include_router(skills.router, prefix="/skills", tags=["Skill Taxonomy"])

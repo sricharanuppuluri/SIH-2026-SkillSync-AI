@@ -16,7 +16,10 @@ SkillSync AI structures its API endpoints as follows:
 | Endpoint Module | Status | Description |
 | --------------- | ------ | ----------- |
 | `/api/v1/health` | **Phase 0 (Active)** | System diagnostic and health ping |
-| `/api/v1/auth` | Phase 2 | User authentication, registration, JWT & RBAC |
+| `/api/v1/auth` | **Phase 2 (Active)** | User authentication, registration, JWT & RBAC |
+| `/api/v1/admin/test` | **Phase 2 (Active)** | Protected test verification endpoint for ADMIN role |
+| `/api/v1/employer/test` | **Phase 2 (Active)** | Protected test verification endpoint for EMPLOYER role |
+| `/api/v1/candidate/test` | **Phase 2 (Active)** | Protected test verification endpoint for CANDIDATE role |
 | `/api/v1/jobs` | Phase 3 | Employer job postings and skill contracts |
 | `/api/v1/candidates` | Phase 4 | Candidate profiles, resumes, and skill records |
 | `/api/v1/skills` | Phase 5 | NLP skill taxonomy and extraction |
@@ -29,70 +32,113 @@ SkillSync AI structures its API endpoints as follows:
 
 ---
 
-## 3. Endpoints (Phase 0)
+## 3. System Endpoints
 
 ### 3.1 Health Check
 
-Retrieves runtime connectivity and status across all core foundation layers (FastAPI, PostgreSQL, Redis, Ollama).
+Retrieves runtime connectivity and status across core foundation layers (FastAPI, PostgreSQL, Redis, Ollama).
 
 - **Method**: `GET`
 - **Route**: `/api/v1/health`
 - **Auth Required**: No
 
-#### Request Example
-```bash
-curl -X GET http://localhost:8000/api/v1/health
+---
+
+## 4. Authentication & RBAC (Phase 2)
+
+### 4.1 Supported Roles
+SkillSync AI defines 5 distinct RBAC roles:
+- `CANDIDATE`: Job seekers, students, and workers accessing skill gap analysis and passports.
+- `EMPLOYER`: Recruiters and hiring organizations managing job requisitions and candidate matches.
+- `TRAINING_PROVIDER`: Institutions providing vocational curriculum and tracking course outcomes.
+- `GOVERNMENT`: Public sector policy analysts and workforce planners monitoring aggregate data.
+- `ADMIN`: Platform operators and system administrators.
+
+### 4.2 Security Architecture & Admin Provisioning
+- **Anti-Privilege Escalation**: Public registration strictly rejects attempts to register with `role="ADMIN"`, returning HTTP `403 Forbidden`. Administrative accounts cannot be self-provisioned via public APIs.
+- **Admin Provisioning**: Administrative users must be created via automated backend database seed migrations, secure CLI tasks, or by existing verified administrators.
+- **Password Security**: Passwords are encrypted using salted bcrypt (`bcrypt.hashpw` with standard cost factor) before database storage. Plaintext passwords and password hashes are never logged and never included in API responses.
+- **JWT Tokens**: Signed using `HS256` with environment-configured secret (`JWT_SECRET_KEY`). Tokens encode `sub` (User UUID), `role`, and `exp` claims.
+
+---
+
+### 4.3 Endpoints
+
+#### Register User
+- **Method**: `POST`
+- **Route**: `/api/v1/auth/register`
+- **Auth Required**: No
+- **Allowed Roles**: `CANDIDATE`, `EMPLOYER`, `TRAINING_PROVIDER`, `GOVERNMENT` (Attempting `ADMIN` returns `403 Forbidden`)
+
+```json
+// Request Body
+{
+  "email": "candidate@example.com",
+  "password": "SecurePassword123!",
+  "full_name": "Aarav Sharma",
+  "role": "CANDIDATE"
+}
+
+// Response (201 Created)
+{
+  "id": "e6a2b8e3-4c91-44bb-b2d9-1c93a8d11002",
+  "email": "candidate@example.com",
+  "full_name": "Aarav Sharma",
+  "role": "CANDIDATE",
+  "is_active": true,
+  "created_at": "2026-09-06T10:00:00Z",
+  "updated_at": "2026-09-06T10:00:00Z"
+}
 ```
 
-#### Successful Response (`200 OK`)
+#### Login
+- **Method**: `POST`
+- **Route**: `/api/v1/auth/login`
+- **Auth Required**: No
+
 ```json
+// Request Body
 {
-  "status": "healthy",
-  "service": "skillsync-api",
-  "version": "0.1.0",
-  "environment": "development",
-  "subsystems": {
-    "database": {
-      "status": "connected",
-      "latency_ms": 2.4,
-      "pgvector_enabled": true
-    },
-    "redis": {
-      "status": "connected",
-      "latency_ms": 1.1
-    },
-    "ai_engine": {
-      "status": "available",
-      "provider": "ollama",
-      "model": "mistral:latest"
-    }
+  "email": "candidate@example.com",
+  "password": "SecurePassword123!"
+}
+
+// Response (200 OK)
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer",
+  "user": {
+    "id": "e6a2b8e3-4c91-44bb-b2d9-1c93a8d11002",
+    "email": "candidate@example.com",
+    "full_name": "Aarav Sharma",
+    "role": "CANDIDATE",
+    "is_active": true,
+    "created_at": "2026-09-06T10:00:00Z",
+    "updated_at": "2026-09-06T10:00:00Z"
   }
 }
 ```
 
-#### Degraded / Offline Response (`200 OK` with subsystem diagnostics)
-Even if PostgreSQL, Redis, or Ollama is unavailable during initial setup, the API returns HTTP 200 with clear diagnostics rather than crashing:
+#### Get Current User Profile
+- **Method**: `GET`
+- **Route**: `/api/v1/auth/me`
+- **Auth Required**: Yes (`Bearer <token>`)
+- **Response**: `UserResponse` (200 OK)
 
-```json
-{
-  "status": "degraded",
-  "service": "skillsync-api",
-  "version": "0.1.0",
-  "environment": "development",
-  "subsystems": {
-    "database": {
-      "status": "disconnected",
-      "error": "Connection refused"
-    },
-    "redis": {
-      "status": "unavailable",
-      "error": "Redis host unreachable"
-    },
-    "ai_engine": {
-      "status": "offline",
-      "provider": "ollama",
-      "error": "Ollama service not running"
-    }
-  }
-}
-```
+#### Logout Session
+- **Method**: `POST`
+- **Route**: `/api/v1/auth/logout`
+- **Auth Required**: Yes (`Bearer <token>`)
+- **Response**: `{"message": "Successfully logged out. Please clear client-side token.", "user_id": "..."}`
+
+---
+
+### 4.4 Representative Protected RBAC Endpoints
+
+| Method | Route | Allowed Roles | Forbidden Roles |
+| ------ | ----- | ------------- | --------------- |
+| `GET` | `/api/v1/admin/test` | `ADMIN` | `CANDIDATE`, `EMPLOYER`, `TRAINING_PROVIDER`, `GOVERNMENT` (403) |
+| `GET` | `/api/v1/employer/test` | `EMPLOYER`, `ADMIN` | `CANDIDATE`, `TRAINING_PROVIDER`, `GOVERNMENT` (403) |
+| `GET` | `/api/v1/candidate/test` | `CANDIDATE`, `ADMIN` | All unauthenticated or unauthorized roles (403) |
+| `GET` | `/api/v1/training-provider/test` | `TRAINING_PROVIDER`, `ADMIN` | `CANDIDATE`, `EMPLOYER`, `GOVERNMENT` (403) |
+| `GET` | `/api/v1/government/test` | `GOVERNMENT`, `ADMIN` | `CANDIDATE`, `EMPLOYER`, `TRAINING_PROVIDER` (403) |
