@@ -1,0 +1,65 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+.venv/
+venv/
+env/
+__pypackages__/
+
+# Next.js
+frontend/.next/
+frontend/out/
+frontend/build/
+.next/
+out/
+build/
+
+# Testing & Coverage
+coverage/
+.nyc_output/
+.coverage
+htmlcov/
+.pytest_cache/
+.ruff_cache/
+
+# Production & Build outputs
+dist/
+*.egg-info/
+*.egg
+.eggs/
+
+# Environment variables
+.env
+.env*.local
+!.env.example
+backend/.env
+frontend/.env.local
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# System & IDE files
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+
+# Database & local data
+*.sqlite3
+*.db
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# ML Model artifacts (downloaded weights)
+ml/models/*
+!ml/models/.gitkeep
