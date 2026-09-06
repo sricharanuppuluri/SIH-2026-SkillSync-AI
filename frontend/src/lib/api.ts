@@ -277,6 +277,8 @@ export const skillsAPI = {
   },
 };
 
+export const skillTaxonomyAPI = skillsAPI;
+
 /**
  * Employer Portal API methods.
  */
@@ -427,4 +429,6 @@ export const semanticSkillAPI = {
     return fetchAPI<import("@/types").EmbeddingStatusResponse>("/api/v1/skills/embeddings/status");
   },
 };
+
+export * from "./trainingApi";
 

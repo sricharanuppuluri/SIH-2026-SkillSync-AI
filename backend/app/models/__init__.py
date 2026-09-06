@@ -6,8 +6,10 @@ from app.models.candidate_education import CandidateEducation
 from app.models.candidate_experience import CandidateExperience
 from app.models.candidate_skill import CandidateSkill, ProficiencyLevel
 from app.models.copilot_conversation import CopilotConversation, CopilotMessage
-from app.models.course import Course, CourseMode, CourseSkill
+from app.models.course import Course, CourseDifficulty, CourseMode, CourseSkill, CourseStatus
+from app.models.curriculum import CurriculumLesson, CurriculumModule
 from app.models.enrollment import Enrollment, EnrollmentStatus
+from app.models.enrollment_progress import EnrollmentLessonProgress
 from app.models.job import EmploymentType, ExperienceLevel, Job, JobSkill, JobStatus
 from app.models.profiles import (
     CandidateProfile,
@@ -37,11 +39,16 @@ __all__ = [
     "CopilotConversation",
     "CopilotMessage",
     "Course",
+    "CourseDifficulty",
     "CourseMode",
     "CourseSkill",
+    "CourseStatus",
+    "CurriculumLesson",
+    "CurriculumModule",
     "EmployerProfile",
     "EmploymentType",
     "Enrollment",
+    "EnrollmentLessonProgress",
     "EnrollmentStatus",
     "ExperienceLevel",
     "GovernmentProfile",

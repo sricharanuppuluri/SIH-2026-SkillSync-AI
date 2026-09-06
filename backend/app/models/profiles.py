@@ -117,6 +117,7 @@ class TrainingProviderProfile(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         nullable=False,
     )
     institution_name: Mapped[str] = mapped_column(String(255), index=True, nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
     provider_type: Mapped[str | None] = mapped_column(String(100), nullable=True)
     location_city: Mapped[str | None] = mapped_column(String(100), nullable=True)
     location_state: Mapped[str | None] = mapped_column(String(100), nullable=True)

@@ -41,10 +41,21 @@ from app.schemas.career_copilot import (
 )
 from app.schemas.course import (
     CourseCreate,
+    CoursePublishValidationResult,
     CourseResponse,
     CourseSkillRequirement,
     CourseSkillResponse,
     CourseUpdate,
+)
+from app.schemas.curriculum import (
+    CurriculumLessonCreate,
+    CurriculumLessonReorderItem,
+    CurriculumLessonResponse,
+    CurriculumLessonUpdate,
+    CurriculumModuleCreate,
+    CurriculumModuleReorderItem,
+    CurriculumModuleResponse,
+    CurriculumModuleUpdate,
 )
 from app.schemas.employer import (
     EmployerApplicationCandidateInfo,
@@ -56,7 +67,10 @@ from app.schemas.employer import (
     EmployerRecentJobItem,
 )
 from app.schemas.enrollment import (
+    EnrollmentCandidateInfo,
     EnrollmentCreate,
+    EnrollmentLessonProgressItem,
+    EnrollmentProgressResponse,
     EnrollmentResponse,
     EnrollmentUpdate,
 )
@@ -107,6 +121,10 @@ from app.schemas.skill_gap import (
     SkillGapStatus,
     SkillGapSummary,
 )
+from app.schemas.training_provider import (
+    TrainingProviderDashboardMetrics,
+    TrainingProviderDashboardResponse,
+)
 
 __all__ = [
     "ApplicationCreate",
@@ -136,10 +154,19 @@ __all__ = [
     "CopilotConversationSummary",
     "CopilotMessageResponse",
     "CourseCreate",
+    "CoursePublishValidationResult",
     "CourseResponse",
     "CourseSkillRequirement",
     "CourseSkillResponse",
     "CourseUpdate",
+    "CurriculumLessonCreate",
+    "CurriculumLessonReorderItem",
+    "CurriculumLessonResponse",
+    "CurriculumLessonUpdate",
+    "CurriculumModuleCreate",
+    "CurriculumModuleReorderItem",
+    "CurriculumModuleResponse",
+    "CurriculumModuleUpdate",
     "EmployerApplicationCandidateInfo",
     "EmployerApplicationResponse",
     "EmployerApplicationStatusUpdate",
@@ -151,7 +178,10 @@ __all__ = [
     "EmployerRecentApplicationItem",
     "EmployerRecentJobItem",
     "EmbeddingStatusResponse",
+    "EnrollmentCandidateInfo",
     "EnrollmentCreate",
+    "EnrollmentLessonProgressItem",
+    "EnrollmentProgressResponse",
     "EnrollmentResponse",
     "EnrollmentUpdate",
     "GapSeverity",
@@ -184,6 +214,8 @@ __all__ = [
     "SkillUpdate",
     "TokenPayload",
     "TokenResponse",
+    "TrainingProviderDashboardMetrics",
+    "TrainingProviderDashboardResponse",
     "TrainingProviderProfileCreate",
     "TrainingProviderProfileResponse",
     "TrainingProviderProfileUpdate",

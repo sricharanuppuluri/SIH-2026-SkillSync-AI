@@ -15,7 +15,8 @@ from sqlalchemy.orm import selectinload
 from app.models.candidate_education import CandidateEducation
 from app.models.candidate_experience import CandidateExperience
 from app.models.candidate_skill import CandidateSkill
-from app.models.course import Course, CourseSkill
+from app.models.course import Course, CourseSkill, CourseStatus
+from app.models.enrollment import Enrollment, EnrollmentStatus
 from app.models.job import Job, JobSkill
 from app.models.profiles import CandidateProfile
 from app.models.user import User
@@ -87,7 +88,48 @@ class CareerContextService:
             if cs.skill:
                 known_canonical_skills.add(cs.skill.name)
 
-        # 5. Optional Job & Deterministic Skill Gap Context
+        # 5. Fetch Candidate Enrolled Courses
+        enrolled_stmt = (
+            select(Enrollment)
+            .options(
+                selectinload(Enrollment.course)
+                .selectinload(Course.skills)
+                .selectinload(CourseSkill.skill),
+                selectinload(Enrollment.lesson_progress),
+            )
+            .where(Enrollment.candidate_id == candidate_profile.id)
+            .order_by(Enrollment.created_at.desc())
+            .limit(MAX_COURSES_LIMIT)
+        )
+        enrolled_res = await db.execute(enrolled_stmt)
+        enrolled_records = enrolled_res.scalars().all()
+
+        enrolled_courses: list[dict[str, Any]] = []
+        for enr in enrolled_records:
+            if enr.course:
+                taught = [cs.skill.name for cs in enr.course.skills if cs.skill]
+                for s in taught:
+                    known_canonical_skills.add(s)
+
+                progress_pct = 0.0
+                if enr.lesson_progress:
+                    tot = len(enr.lesson_progress)
+                    comp = sum(1 for lp in enr.lesson_progress if lp.is_completed)
+                    progress_pct = round((comp / tot) * 100, 1) if tot > 0 else 0.0
+                elif enr.status == EnrollmentStatus.COMPLETED:
+                    progress_pct = 100.0
+
+                enrolled_courses.append(
+                    {
+                        "id": str(enr.course.id),
+                        "title": enr.course.title,
+                        "status": enr.status.value,
+                        "progress_percent": progress_pct,
+                        "skills_taught": taught,
+                    }
+                )
+
+        # 6. Optional Job & Deterministic Skill Gap Context
         job: Job | None = None
         skill_gap_report: SkillGapReport | None = None
         missing_skill_ids: list[uuid.UUID] = []
@@ -122,7 +164,7 @@ class CareerContextService:
                 except Exception as exc:
                     logger.warning("Could not calculate skill gap for job %s: %s", job_id, exc)
 
-        # 6. Fetch Real Course Records linked to relevant skills
+        # 7. Fetch Real Course Records linked to relevant skills (PUBLISHED courses only)
         relevant_courses: list[dict[str, Any]] = []
         if missing_skill_ids:
             course_stmt = (
@@ -131,6 +173,7 @@ class CareerContextService:
                 .options(selectinload(Course.skills).selectinload(CourseSkill.skill))
                 .where(
                     CourseSkill.skill_id.in_(missing_skill_ids),
+                    Course.status == CourseStatus.PUBLISHED,
                     Course.is_active.is_(True),
                 )
                 .distinct()
@@ -154,12 +197,13 @@ class CareerContextService:
                     }
                 )
 
-        # 7. Construct Formatted Trusted Context String
+        # 8. Construct Formatted Trusted Context String
         formatted_context = self._format_trusted_context(
             candidate_profile=candidate_profile,
             cand_skills=cand_skills,
             cand_educations=cand_educations,
             cand_experiences=cand_experiences,
+            enrolled_courses=enrolled_courses,
             job=job,
             skill_gap_report=skill_gap_report,
             relevant_courses=relevant_courses,
@@ -170,6 +214,7 @@ class CareerContextService:
             "job_id": job.id if job else None,
             "known_canonical_skills": known_canonical_skills,
             "skill_gap_report": skill_gap_report,
+            "enrolled_courses": enrolled_courses,
             "relevant_courses": relevant_courses,
             "formatted_context": formatted_context,
         }
@@ -180,6 +225,7 @@ class CareerContextService:
         cand_skills: list[CandidateSkill],
         cand_educations: list[CandidateEducation],
         cand_experiences: list[CandidateExperience],
+        enrolled_courses: list[dict[str, Any]],
         job: Job | None,
         skill_gap_report: SkillGapReport | None,
         relevant_courses: list[dict[str, Any]],
@@ -224,6 +270,17 @@ class CareerContextService:
         else:
             skills_lines.append("- No skills currently recorded in profile.")
         sections.append("\n".join(skills_lines))
+
+        # Candidate Enrolled Courses Section
+        if enrolled_courses:
+            enr_lines = ["### CANDIDATE ENROLLED COURSES (TRAINING PROGRESS)"]
+            for ec in enrolled_courses:
+                skills_str = ", ".join(ec["skills_taught"]) if ec["skills_taught"] else "General"
+                enr_lines.append(
+                    f"- Course: '{ec['title']}' | Status: {ec['status']} | "
+                    f"Progress: {ec['progress_percent']}% | Skills: {skills_str}"
+                )
+            sections.append("\n".join(enr_lines))
 
         # Candidate Education Section
         if cand_educations:

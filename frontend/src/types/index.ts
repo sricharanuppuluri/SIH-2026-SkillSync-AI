@@ -6,6 +6,7 @@ export * from "./extraction";
 export * from "./semantic";
 export * from "./skill";
 export * from "./skillGap";
+export * from "./training";
 
 export interface DatabaseHealth {
   status: "connected" | "disconnected" | "degraded";
