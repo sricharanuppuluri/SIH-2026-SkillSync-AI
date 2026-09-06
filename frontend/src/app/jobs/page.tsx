@@ -1,10 +1,15 @@
+"use client";
+
 import * as React from "react";
-import { Briefcase, ArrowLeft } from "lucide-react";
+import { Briefcase, ArrowLeft, Plus } from "lucide-react";
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/Button";
 
 export default function JobsPage() {
+  const { user } = useAuth();
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -16,25 +21,42 @@ export default function JobsPage() {
             Structured vacancy intake and industry competency specifications.
           </p>
         </div>
-        <Link href="/dashboard">
-          <Button variant="outline" size="sm">
-            <ArrowLeft className="w-3.5 h-3.5 mr-1.5" />
-            Back to Dashboard
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          {user?.role === "EMPLOYER" && (
+            <Link href="/employer/jobs/new">
+              <Button variant="primary" size="sm">
+                <Plus className="w-3.5 h-3.5 mr-1.5" />
+                Post New Job
+              </Button>
+            </Link>
+          )}
+          <Link href="/dashboard">
+            <Button variant="outline" size="sm">
+              <ArrowLeft className="w-3.5 h-3.5 mr-1.5" />
+              Back to Dashboard
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <EmptyState
         icon={Briefcase}
-        title="Job Requisitions Module Coming Soon"
-        description="This module will allow employers to post vacancies, define structured skill requirements, and connect with trained candidates. Scheduled for Phase 3."
-        phaseBadge="Phase 3 Roadmap"
+        title="Employer Job Requisitions Active"
+        description="Employers can create, publish, and manage structured job requisitions with required skill proficiencies and weights."
+        phaseBadge="Phase 4 Live"
         action={
-          <Link href="/dashboard">
-            <Button variant="primary" size="sm">
-              Return to System Dashboard
-            </Button>
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link href="/employer/jobs">
+              <Button variant="primary" size="sm">
+                Open Employer Job Portal
+              </Button>
+            </Link>
+            <Link href="/dashboard">
+              <Button variant="outline" size="sm">
+                Return to Dashboard
+              </Button>
+            </Link>
+          </div>
         }
       />
     </div>

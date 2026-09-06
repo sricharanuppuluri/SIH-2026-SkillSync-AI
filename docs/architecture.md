@@ -123,3 +123,40 @@ The domain foundation establishes relational models, constraints, and cascade po
 - **Profile Cascade**: Deleting an `EmployerProfile` cascades to their `Job` listings; deleting a `TrainingProviderProfile` cascades to their `Course` offerings; deleting a `CandidateProfile` cascades to their `CandidateSkill`, `Application`, and `Enrollment` rows.
 - **Skill Protection**: Canonical `Skill` records are referenced via foreign keys with cascade deletion on junction tables to maintain referential hygiene while preserving taxonomy integrity.
 - **Deduplication**: Composite unique constraints prevent duplicate applications (`candidate_id`, `job_id`), duplicate enrollments (`candidate_id`, `course_id`), and duplicate junction assignments.
+
+---
+
+## 5. Employer Module Architecture (Phase 4 — Active)
+
+### 5.1 Multi-Tenant Ownership & Isolation Model
+To ensure absolute data isolation across different hiring organizations:
+1. **Server-Derived Identity**: The employer's identity is strictly resolved from the authenticated JWT session (`current_user.id` → `EmployerProfile.id`). Client requests cannot supply an arbitrary `employer_id`.
+2. **Access Control Barrier**:
+   - `require_roles(UserRole.EMPLOYER, UserRole.ADMIN)` protects all `/api/v1/employer/*` endpoints.
+   - Candidates and unauthenticated callers are rejected with HTTP 403 and 401 respectively.
+3. **Information Concealment**: Cross-tenant attempts (e.g. Employer A requesting Employer B's job or applicant) return HTTP `404 Not Found` rather than `403 Forbidden`, preventing resource enumeration attacks.
+
+### 5.2 Deterministic Requisition Lifecycle State Machine
+Job requisitions follow an explicit deterministic lifecycle:
+```text
+  ┌─────────┐      publish      ┌───────────┐       close       ┌────────┐
+  │  DRAFT  │ ────────────────> │ PUBLISHED │ ────────────────> │ CLOSED │
+  └─────────┘                   └───────────┘                   └────────┘
+       ▲                              │                              │
+       │                              │                              │
+       └────────── re-open ───────────┴────────── re-open ───────────┘
+```
+- **Draft**: Editable, unindexed, not accepting submissions.
+- **Published**: Readily visible to candidates, accepting applications, active in search indexes. Synchronizes `is_active=True`.
+- **Closed**: Locked from candidate applications, preserves historical analytics and applicant records. Synchronizes `is_active=False`.
+
+### 5.3 Live Aggregated Metrics Engine
+The employer dashboard operates on zero mocked or hardcoded statistics. Key performance metrics are calculated in real time using SQL aggregations:
+- Total, published, draft, and closed jobs directly queried against the employer's profile.
+- Total application count and status breakdown (`APPLIED`, `SHORTLISTED`, `INTERVIEW`, `OFFERED`, `REJECTED`, `HIRED`) computed via joined grouping.
+- Submissions and requisitions are presented in real time with pagination and filtering.
+
+### 5.4 Frontend Architecture
+- **EmployerDashboard**: Rendered on `/dashboard` when user role is `EMPLOYER`.
+- **SkillSelector**: Reusable competency intake component querying the canonical taxonomy, enforcing uniqueness, and assigning proficiency thresholds and weight parameters.
+- **Role-Aware Sidebar**: Dynamic navigation items (`Manage Jobs`, `Review Applicants`, `Company Profile`) scoped by RBAC role with client-side and server-side route guards.

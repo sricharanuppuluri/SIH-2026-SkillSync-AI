@@ -12,6 +12,8 @@ import {
   Award,
   BarChart3,
   Settings,
+  Users,
+  Building2,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -35,11 +37,28 @@ export const navItems: NavItem[] = [
     status: "available",
   },
   {
+    title: "Manage Jobs",
+    href: "/employer/jobs",
+    icon: Briefcase,
+    status: "available",
+  },
+  {
+    title: "Review Applicants",
+    href: "/employer/applications",
+    icon: Users,
+    status: "available",
+  },
+  {
+    title: "Company Profile",
+    href: "/employer/profile",
+    icon: Building2,
+    status: "available",
+  },
+  {
     title: "Jobs Requisitions",
     href: "/jobs",
     icon: Briefcase,
-    status: "coming-soon",
-    phase: "Phase 3",
+    status: "available",
   },
   {
     title: "Skill Taxonomy",
@@ -86,11 +105,22 @@ export const navItems: NavItem[] = [
 
 export const ROLE_NAV_PERMISSIONS: Record<UserRole, string[]> = {
   CANDIDATE: ["/dashboard", "/skills", "/learning", "/matching", "/passport", "/settings"],
-  EMPLOYER: ["/dashboard", "/jobs", "/matching", "/settings"],
+  EMPLOYER: [
+    "/dashboard",
+    "/employer/jobs",
+    "/employer/applications",
+    "/employer/profile",
+    "/jobs",
+    "/matching",
+    "/settings",
+  ],
   TRAINING_PROVIDER: ["/dashboard", "/learning", "/settings"],
   GOVERNMENT: ["/dashboard", "/analytics", "/settings"],
   ADMIN: [
     "/dashboard",
+    "/employer/jobs",
+    "/employer/applications",
+    "/employer/profile",
     "/jobs",
     "/skills",
     "/learning",

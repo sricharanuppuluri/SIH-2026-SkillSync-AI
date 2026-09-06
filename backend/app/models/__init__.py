@@ -5,7 +5,7 @@ from app.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 from app.models.candidate_skill import CandidateSkill, ProficiencyLevel
 from app.models.course import Course, CourseMode, CourseSkill
 from app.models.enrollment import Enrollment, EnrollmentStatus
-from app.models.job import EmploymentType, ExperienceLevel, Job, JobSkill
+from app.models.job import EmploymentType, ExperienceLevel, Job, JobSkill, JobStatus
 from app.models.profiles import (
     CandidateProfile,
     EmployerProfile,
@@ -32,6 +32,7 @@ __all__ = [
     "GovernmentProfile",
     "Job",
     "JobSkill",
+    "JobStatus",
     "ProficiencyLevel",
     "Skill",
     "TimestampMixin",

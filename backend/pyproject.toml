@@ -29,6 +29,10 @@ dev = [
 [tool.ruff]
 line-length = 100
 target-version = "py312"
+exclude = [
+    "migrations/versions/0001_initial_pgvector.py",
+    "migrations/versions/0002_create_users_table.py",
+]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP"]
