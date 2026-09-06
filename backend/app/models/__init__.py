@@ -2,6 +2,8 @@
 
 from app.models.application import Application, ApplicationStatus
 from app.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
+from app.models.candidate_education import CandidateEducation
+from app.models.candidate_experience import CandidateExperience
 from app.models.candidate_skill import CandidateSkill, ProficiencyLevel
 from app.models.course import Course, CourseMode, CourseSkill
 from app.models.enrollment import Enrollment, EnrollmentStatus
@@ -26,6 +28,8 @@ __all__ = [
     "Application",
     "ApplicationStatus",
     "Base",
+    "CandidateEducation",
+    "CandidateExperience",
     "CandidateProfile",
     "CandidateSkill",
     "Course",

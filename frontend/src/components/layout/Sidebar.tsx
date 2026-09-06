@@ -14,6 +14,8 @@ import {
   Settings,
   Users,
   Building2,
+  User as UserIcon,
+  Sparkles,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -34,6 +36,30 @@ export const navItems: NavItem[] = [
     title: "Dashboard",
     href: "/dashboard",
     icon: LayoutDashboard,
+    status: "available",
+  },
+  {
+    title: "My Profile",
+    href: "/candidate/profile",
+    icon: UserIcon,
+    status: "available",
+  },
+  {
+    title: "My Skills",
+    href: "/candidate/skills",
+    icon: Cpu,
+    status: "available",
+  },
+  {
+    title: "Work Experience",
+    href: "/candidate/experience",
+    icon: Briefcase,
+    status: "available",
+  },
+  {
+    title: "Education",
+    href: "/candidate/education",
+    icon: GraduationCap,
     status: "available",
   },
   {
@@ -64,6 +90,12 @@ export const navItems: NavItem[] = [
     title: "Skill Taxonomy",
     href: "/admin/skills",
     icon: Cpu,
+    status: "available",
+  },
+  {
+    title: "AI Skill Extractor",
+    href: "/tools/skill-extractor",
+    icon: Sparkles,
     status: "available",
   },
   {
@@ -103,12 +135,25 @@ export const navItems: NavItem[] = [
 ];
 
 export const ROLE_NAV_PERMISSIONS: Record<UserRole, string[]> = {
-  CANDIDATE: ["/dashboard", "/learning", "/matching", "/passport", "/settings"],
+  CANDIDATE: [
+    "/dashboard",
+    "/candidate/profile",
+    "/candidate/skills",
+    "/candidate/experience",
+    "/candidate/education",
+    "/tools/skill-extractor",
+    "/jobs",
+    "/learning",
+    "/matching",
+    "/passport",
+    "/settings",
+  ],
   EMPLOYER: [
     "/dashboard",
     "/employer/jobs",
     "/employer/applications",
     "/employer/profile",
+    "/tools/skill-extractor",
     "/jobs",
     "/matching",
     "/settings",
@@ -117,11 +162,16 @@ export const ROLE_NAV_PERMISSIONS: Record<UserRole, string[]> = {
   GOVERNMENT: ["/dashboard", "/analytics", "/settings"],
   ADMIN: [
     "/dashboard",
+    "/candidate/profile",
+    "/candidate/skills",
+    "/candidate/experience",
+    "/candidate/education",
     "/employer/jobs",
     "/employer/applications",
     "/employer/profile",
     "/jobs",
     "/admin/skills",
+    "/tools/skill-extractor",
     "/learning",
     "/matching",
     "/passport",
