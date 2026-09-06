@@ -19,6 +19,10 @@ oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_PREFIX}/auth/login",
     auto_error=True,
 )
+oauth2_scheme_optional = OAuth2PasswordBearer(
+    tokenUrl=f"{settings.API_V1_PREFIX}/auth/login",
+    auto_error=False,
+)
 
 
 async def get_current_user(
@@ -83,3 +87,26 @@ def require_roles(*allowed_roles: UserRole) -> Callable:
         return current_user
 
     return role_checker
+
+
+async def get_optional_current_user(
+    token: str | None = Depends(oauth2_scheme_optional),
+    db: AsyncSession = Depends(get_db),
+) -> User | None:
+    """Retrieve the current user if an access token is provided, otherwise return None."""
+    if not token:
+        return None
+    try:
+        payload = decode_access_token(token)
+        user_id_str: str | None = payload.get("sub")
+        if not user_id_str:
+            return None
+        user_id = uuid.UUID(user_id_str)
+        stmt = select(User).where(User.id == user_id)
+        result = await db.execute(stmt)
+        user = result.scalar_one_or_none()
+        if user and user.is_active:
+            return user
+        return None
+    except Exception:
+        return None
