@@ -11,6 +11,7 @@ from app.models.curriculum import CurriculumLesson, CurriculumModule
 from app.models.enrollment import Enrollment, EnrollmentStatus
 from app.models.enrollment_progress import EnrollmentLessonProgress
 from app.models.job import EmploymentType, ExperienceLevel, Job, JobSkill, JobStatus
+from app.models.passport_share import SkillPassportShare
 from app.models.profiles import (
     CandidateProfile,
     EmployerProfile,
@@ -26,7 +27,9 @@ from app.models.skill import (
     SkillType,
 )
 from app.models.skill_embedding import SkillEmbedding
+from app.models.skill_evidence import EvidenceStatus, EvidenceType, SkillEvidence
 from app.models.user import User, UserRole
+from app.models.verified_skill import VerificationMethod, VerificationStatus, VerifiedSkill
 
 __all__ = [
     "Application",
@@ -50,6 +53,8 @@ __all__ = [
     "Enrollment",
     "EnrollmentLessonProgress",
     "EnrollmentStatus",
+    "EvidenceStatus",
+    "EvidenceType",
     "ExperienceLevel",
     "GovernmentProfile",
     "Job",
@@ -59,6 +64,8 @@ __all__ = [
     "Skill",
     "SkillAlias",
     "SkillEmbedding",
+    "SkillEvidence",
+    "SkillPassportShare",
     "SkillRelationship",
     "SkillRelationshipType",
     "SkillStatus",
@@ -68,4 +75,7 @@ __all__ = [
     "UUIDPrimaryKeyMixin",
     "User",
     "UserRole",
+    "VerificationMethod",
+    "VerificationStatus",
+    "VerifiedSkill",
 ]

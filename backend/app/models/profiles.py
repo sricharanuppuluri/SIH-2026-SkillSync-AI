@@ -19,7 +19,10 @@ if TYPE_CHECKING:
     from app.models.course import Course
     from app.models.enrollment import Enrollment
     from app.models.job import Job
+    from app.models.passport_share import SkillPassportShare
+    from app.models.skill_evidence import SkillEvidence
     from app.models.user import User
+    from app.models.verified_skill import VerifiedSkill
 
 
 class CandidateProfile(Base, UUIDPrimaryKeyMixin, TimestampMixin):
@@ -69,6 +72,18 @@ class CandidateProfile(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     )
     copilot_conversations: Mapped[list["CopilotConversation"]] = relationship(
         "CopilotConversation", back_populates="candidate", cascade="all, delete-orphan"
+    )
+    skill_evidences: Mapped[list["SkillEvidence"]] = relationship(
+        "SkillEvidence", back_populates="candidate", cascade="all, delete-orphan"
+    )
+    verified_skills: Mapped[list["VerifiedSkill"]] = relationship(
+        "VerifiedSkill", back_populates="candidate", cascade="all, delete-orphan"
+    )
+    passport_share: Mapped["SkillPassportShare | None"] = relationship(
+        "SkillPassportShare",
+        back_populates="candidate",
+        cascade="all, delete-orphan",
+        uselist=False,
     )
 
     def __repr__(self) -> str:

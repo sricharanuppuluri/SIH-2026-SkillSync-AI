@@ -82,6 +82,17 @@ from app.schemas.job import (
     JobSkillResponse,
     JobUpdate,
 )
+from app.schemas.passport import (
+    CandidatePassportResponse,
+    PassportCandidateSummary,
+    PassportShareResponse,
+    PassportShareToggleRequest,
+    PassportStats,
+    PublicPassportResponse,
+    SkillEvidenceCreate,
+    SkillEvidenceRead,
+    VerifiedSkillItem,
+)
 from app.schemas.profiles import (
     CandidateProfileCreate,
     CandidateProfileResponse,
@@ -137,6 +148,7 @@ __all__ = [
     "CandidateExperienceCreate",
     "CandidateExperienceResponse",
     "CandidateExperienceUpdate",
+    "CandidatePassportResponse",
     "CandidateProfileCreate",
     "CandidateProfileRead",
     "CandidateProfileResponse",
@@ -195,7 +207,12 @@ __all__ = [
     "JobSkillResponse",
     "JobUpdate",
     "MatchType",
+    "PassportCandidateSummary",
+    "PassportShareResponse",
+    "PassportShareToggleRequest",
+    "PassportStats",
     "ProfileCompletenessResponse",
+    "PublicPassportResponse",
     "SemanticMatchItem",
     "SemanticMatchRequest",
     "SemanticMatchResponse",
@@ -204,6 +221,8 @@ __all__ = [
     "SkillCatalogItem",
     "SkillCreate",
     "SkillDetailResponse",
+    "SkillEvidenceCreate",
+    "SkillEvidenceRead",
     "SkillGapItem",
     "SkillGapReport",
     "SkillGapStatus",
@@ -222,4 +241,5 @@ __all__ = [
     "UserLoginRequest",
     "UserRegisterRequest",
     "UserResponse",
+    "VerifiedSkillItem",
 ]

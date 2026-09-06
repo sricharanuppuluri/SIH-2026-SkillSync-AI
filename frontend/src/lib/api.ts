@@ -431,4 +431,5 @@ export const semanticSkillAPI = {
 };
 
 export * from "./trainingApi";
+export * from "./passportApi";
 

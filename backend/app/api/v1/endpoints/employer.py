@@ -16,7 +16,8 @@ from app.schemas.employer import (
     EmployerDashboardResponse,
 )
 from app.schemas.job import JobCreate, JobResponse, JobUpdate
-from app.services import employer_service, profile_service
+from app.schemas.passport import CandidatePassportResponse
+from app.services import employer_service, profile_service, verified_skill_service
 
 router = APIRouter()
 
@@ -225,4 +226,21 @@ async def update_application_status(
         employer_profile_id=employer_profile.id,
         application_id=application_id,
         new_status=req.status,
+    )
+
+
+@router.get(
+    "/candidates/{candidate_id}/passport",
+    response_model=CandidatePassportResponse,
+    summary="View applicant Verified Skill Passport",
+)
+async def get_applicant_passport(
+    candidate_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_roles(UserRole.EMPLOYER, UserRole.ADMIN)),
+) -> CandidatePassportResponse:
+    """View applicant's Verified Skill Passport strictly guarded by job application relationship."""
+    employer_profile = await profile_service.get_or_create_employer_profile(db, current_user)
+    return await verified_skill_service.get_employer_candidate_passport(
+        db, employer_profile.id, candidate_id
     )

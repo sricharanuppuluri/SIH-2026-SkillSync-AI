@@ -13,7 +13,7 @@ class CurriculumLessonBase(BaseModel):
     description: str | None = None
     content: str | None = None
     duration_minutes: int = Field(default=30, ge=1)
-    order_index: int = Field(default=1, ge=1)
+    order_index: int = Field(default=0, ge=0)
 
 
 class CurriculumLessonCreate(CurriculumLessonBase):
@@ -29,7 +29,7 @@ class CurriculumLessonUpdate(BaseModel):
     description: str | None = None
     content: str | None = None
     duration_minutes: int | None = Field(default=None, ge=1)
-    order_index: int | None = Field(default=None, ge=1)
+    order_index: int | None = Field(default=None, ge=0)
 
 
 class CurriculumLessonResponse(CurriculumLessonBase):
@@ -48,7 +48,7 @@ class CurriculumModuleBase(BaseModel):
 
     title: str = Field(..., min_length=2, max_length=255)
     description: str | None = None
-    order_index: int = Field(default=1, ge=1)
+    order_index: int = Field(default=0, ge=0)
 
 
 class CurriculumModuleCreate(CurriculumModuleBase):
@@ -62,7 +62,7 @@ class CurriculumModuleUpdate(BaseModel):
 
     title: str | None = Field(default=None, min_length=2, max_length=255)
     description: str | None = None
-    order_index: int | None = Field(default=None, ge=1)
+    order_index: int | None = Field(default=None, ge=0)
 
 
 class CurriculumModuleResponse(CurriculumModuleBase):

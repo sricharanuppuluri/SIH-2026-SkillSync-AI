@@ -132,10 +132,9 @@ export const navItems: NavItem[] = [
   },
   {
     title: "Skill Passport",
-    href: "/passport",
+    href: "/candidate/passport",
     icon: Award,
-    status: "coming-soon",
-    phase: "Phase 12",
+    status: "available",
   },
   {
     title: "Outcome Analytics",
@@ -156,6 +155,8 @@ export const ROLE_NAV_PERMISSIONS: Record<UserRole, string[]> = {
   CANDIDATE: [
     "/dashboard",
     "/candidate/copilot",
+    "/candidate/passport",
+    "/passport",
     "/candidate/profile",
     "/candidate/skills",
     "/candidate/experience",
@@ -194,6 +195,8 @@ export const ROLE_NAV_PERMISSIONS: Record<UserRole, string[]> = {
   ADMIN: [
     "/dashboard",
     "/candidate/copilot",
+    "/candidate/passport",
+    "/passport",
     "/candidate/profile",
     "/candidate/skills",
     "/candidate/experience",
