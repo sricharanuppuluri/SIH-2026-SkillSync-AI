@@ -1,12 +1,21 @@
 """User database model and role definitions."""
 
 import enum
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, String
 from sqlalchemy import Enum as SQLEnum
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
+
+if TYPE_CHECKING:
+    from app.models.profiles import (
+        CandidateProfile,
+        EmployerProfile,
+        GovernmentProfile,
+        TrainingProviderProfile,
+    )
 
 
 class UserRole(enum.StrEnum):
@@ -47,6 +56,32 @@ class User(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         Boolean,
         default=True,
         nullable=False,
+    )
+
+    # 1-to-1 Profile Relationships
+    candidate_profile: Mapped["CandidateProfile | None"] = relationship(
+        "CandidateProfile",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+    employer_profile: Mapped["EmployerProfile | None"] = relationship(
+        "EmployerProfile",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+    training_provider_profile: Mapped["TrainingProviderProfile | None"] = relationship(
+        "TrainingProviderProfile",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+    government_profile: Mapped["GovernmentProfile | None"] = relationship(
+        "GovernmentProfile",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
     )
 
     def __repr__(self) -> str:

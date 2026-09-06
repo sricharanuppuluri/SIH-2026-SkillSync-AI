@@ -73,3 +73,53 @@ Rather than prematurely adopting distributed microservices, SkillSync AI leverag
 - **Embeddings**: Sentence-Transformers / local embedding models (`nomic-embed-text`, `all-MiniLM-L6-v2`).
 - **NLP & Taxonomy Extraction**: spaCy, regex, and scikit-learn for skill entity recognition and gap analysis.
 - **Resilience**: The backend is architected to operate gracefully even when local AI models are offline or downloading.
+
+---
+
+## 4. Core Domain Models & Relational Architecture (Phase 3)
+
+The domain foundation establishes relational models, constraints, and cascade policies across the core actors and capabilities:
+
+```text
+               User (id, email, role)
+                ├── CandidateProfile (user_id -> users.id)
+                │     ├── CandidateSkill (candidate_id, skill_id, proficiency)
+                │     ├── Application (candidate_id, job_id, status)
+                │     └── Enrollment (candidate_id, course_id, status)
+                │
+                ├── EmployerProfile (user_id -> users.id)
+                │     └── Job (employer_id -> employer_profiles.id)
+                │           ├── JobSkill (job_id, skill_id, importance)
+                │           └── Application (candidate_id, job_id, status)
+                │
+                ├── TrainingProviderProfile (user_id -> users.id)
+                │     └── Course (provider_id -> training_provider_profiles.id)
+                │           ├── CourseSkill (course_id, skill_id)
+                │           └── Enrollment (candidate_id, course_id, status)
+                │
+                ├── GovernmentProfile (user_id -> users.id)
+                │
+                └── Skill (canonical taxonomy; id, name, normalized_name)
+```
+
+### 4.1 Primary Domain Entities
+
+1. **User**: Core authentication identity and RBAC role. Has 1-to-1 relationships to role-specific profiles.
+2. **CandidateProfile**: Job seeker profile (education, experience, location, bio).
+3. **EmployerProfile**: Corporate hiring identity (company name, industry, size, location).
+4. **TrainingProviderProfile**: Educational/vocational institution identity (accreditation, capacity).
+5. **GovernmentProfile**: Labor analytics and public policy department profile.
+6. **Skill**: Canonical skill taxonomy node. Enforces unique `normalized_name` for deduplication.
+7. **Job**: Employer requisition specifying location, employment type, seniority, salary bounds.
+8. **JobSkill**: Many-to-many junction attaching required skills, proficiency expectations, and weights to jobs.
+9. **CandidateSkill**: Candidate competency profile linking verified skills and years of experience.
+10. **Course**: Training curriculum offered by a provider with duration, mode, capacity, and seat tracking.
+11. **CourseSkill**: Many-to-many junction attaching skills taught by a course curriculum.
+12. **Application**: Formal job application tracking candidate status transitions (`APPLIED` → `HIRED`/`REJECTED`).
+13. **Enrollment**: Course registration tracking candidate training progression (`ENROLLED` → `COMPLETED`/`DROPPED`).
+
+### 4.2 Referential Integrity & Cascade Guarantees
+- **User Cascade**: Deleting a `User` cascades to delete their respective profile (`CandidateProfile`, `EmployerProfile`, `TrainingProviderProfile`, `GovernmentProfile`).
+- **Profile Cascade**: Deleting an `EmployerProfile` cascades to their `Job` listings; deleting a `TrainingProviderProfile` cascades to their `Course` offerings; deleting a `CandidateProfile` cascades to their `CandidateSkill`, `Application`, and `Enrollment` rows.
+- **Skill Protection**: Canonical `Skill` records are referenced via foreign keys with cascade deletion on junction tables to maintain referential hygiene while preserving taxonomy integrity.
+- **Deduplication**: Composite unique constraints prevent duplicate applications (`candidate_id`, `job_id`), duplicate enrollments (`candidate_id`, `course_id`), and duplicate junction assignments.

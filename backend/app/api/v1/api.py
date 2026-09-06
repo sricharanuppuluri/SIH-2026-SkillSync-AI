@@ -2,7 +2,15 @@
 
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import auth, health, rbac_test
+from app.api.v1.endpoints import (
+    auth,
+    courses,
+    health,
+    jobs,
+    profiles,
+    rbac_test,
+    skills,
+)
 
 api_router = APIRouter()
 
@@ -13,13 +21,8 @@ api_router.include_router(health.router, tags=["Health"])
 api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 api_router.include_router(rbac_test.router, tags=["RBAC Verification"])
 
-# Future Phase Modules (Ready to be mounted):
-# api_router.include_router(jobs.router, prefix="/jobs", tags=["Employer Jobs"])
-# api_router.include_router(candidates.router, prefix="/candidates", tags=["Candidate Profiles"])
-# api_router.include_router(skills.router, prefix="/skills", tags=["Skill Taxonomy"])
-# api_router.include_router(matching.router, prefix="/matching", tags=["Matching Engine"])
-# api_router.include_router(copilot.router, prefix="/copilot", tags=["Career Copilot"])
-# api_router.include_router(curriculum.router, prefix="/curriculum", tags=["Curriculum Optimizer"])
-# api_router.include_router(demand.router, prefix="/demand", tags=["Demand Forecasting"])
-# api_router.include_router(passport.router, prefix="/passport", tags=["Skill Passport"])
-# api_router.include_router(outcomes.router, prefix="/outcomes", tags=["Outcome Intelligence"])
+# Phase 3: Core Domain Foundation Endpoints
+api_router.include_router(skills.router, prefix="/skills", tags=["Skills Taxonomy"])
+api_router.include_router(jobs.router, prefix="/jobs", tags=["Jobs"])
+api_router.include_router(courses.router, prefix="/courses", tags=["Courses"])
+api_router.include_router(profiles.router, prefix="/profiles", tags=["Profiles"])
