@@ -4,8 +4,9 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { X } from "lucide-react";
-import { navItems } from "./Sidebar";
+import { navItems, ROLE_NAV_PERMISSIONS } from "./Sidebar";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 
 interface MobileNavProps {
   open: boolean;
@@ -14,6 +15,14 @@ interface MobileNavProps {
 
 export function MobileNav({ open, onClose }: MobileNavProps) {
   const pathname = usePathname();
+  const { user } = useAuth();
+
+  const displayedItems = React.useMemo(() => {
+    if (!user || !user.role || !ROLE_NAV_PERMISSIONS[user.role]) {
+      return navItems;
+    }
+    return navItems.filter((item) => ROLE_NAV_PERMISSIONS[user.role].includes(item.href));
+  }, [user]);
 
   // Close mobile navigation on route change
   React.useEffect(() => {
@@ -55,7 +64,7 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
                 SkillSync <span className="text-indigo-400">AI</span>
               </span>
               <div className="text-[10px] text-slate-400 font-mono">
-                Phase 1 Shell
+                {user ? `${user.role} Portal` : "Phase 2 Shell"}
               </div>
             </div>
           </div>
@@ -75,7 +84,7 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
             Platform Modules
           </div>
 
-          {navItems.map((item) => {
+          {displayedItems.map((item) => {
             const Icon = item.icon;
             const isActive =
               pathname === item.href ||
@@ -120,10 +129,10 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
         <div className="pt-4 border-t border-slate-800 text-[11px] text-slate-500">
           <div className="flex items-center justify-between">
             <span>SkillSync AI</span>
-            <span className="text-indigo-400 font-mono">v0.1.0</span>
+            <span className="text-indigo-400 font-mono">v0.3.0</span>
           </div>
           <p className="text-[10px] text-slate-600 mt-1">
-            Free & Open-Source Modular Monolith
+            Free &amp; Open-Source Modular Monolith
           </p>
         </div>
       </div>

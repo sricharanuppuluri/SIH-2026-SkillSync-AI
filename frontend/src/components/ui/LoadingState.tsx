@@ -13,6 +13,21 @@ export function Skeleton({
   );
 }
 
+export function LoadingState({
+  message = "Loading...",
+  className,
+}: {
+  message?: string;
+  className?: string;
+}) {
+  return (
+    <div className={cn("flex flex-col items-center justify-center p-8 gap-3 text-slate-400", className)}>
+      <div className="w-8 h-8 rounded-full border-2 border-indigo-500/30 border-t-indigo-500 animate-spin" />
+      <span className="text-xs">{message}</span>
+    </div>
+  );
+}
+
 export function MetricCardSkeleton() {
   return (
     <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5 space-y-3">

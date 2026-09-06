@@ -16,6 +16,8 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
+import { UserRole } from "@/types";
 
 export interface NavItem {
   title: string;
@@ -82,6 +84,23 @@ export const navItems: NavItem[] = [
   },
 ];
 
+export const ROLE_NAV_PERMISSIONS: Record<UserRole, string[]> = {
+  CANDIDATE: ["/dashboard", "/skills", "/learning", "/matching", "/passport", "/settings"],
+  EMPLOYER: ["/dashboard", "/jobs", "/matching", "/settings"],
+  TRAINING_PROVIDER: ["/dashboard", "/learning", "/settings"],
+  GOVERNMENT: ["/dashboard", "/analytics", "/settings"],
+  ADMIN: [
+    "/dashboard",
+    "/jobs",
+    "/skills",
+    "/learning",
+    "/matching",
+    "/passport",
+    "/analytics",
+    "/settings",
+  ],
+};
+
 interface SidebarProps {
   collapsed: boolean;
   onToggleCollapse: () => void;
@@ -90,6 +109,14 @@ interface SidebarProps {
 
 export function Sidebar({ collapsed, onToggleCollapse, className }: SidebarProps) {
   const pathname = usePathname();
+  const { user } = useAuth();
+
+  const displayedItems = React.useMemo(() => {
+    if (!user || !user.role || !ROLE_NAV_PERMISSIONS[user.role]) {
+      return navItems;
+    }
+    return navItems.filter((item) => ROLE_NAV_PERMISSIONS[user.role].includes(item.href));
+  }, [user]);
 
   return (
     <aside
@@ -114,7 +141,7 @@ export function Sidebar({ collapsed, onToggleCollapse, className }: SidebarProps
                 SkillSync <span className="text-indigo-400">AI</span>
               </span>
               <span className="text-[10px] text-slate-400 font-mono">
-                Modular Monolith
+                {user ? `${user.role} Portal` : "Modular Monolith"}
               </span>
             </div>
           )}
@@ -138,7 +165,7 @@ export function Sidebar({ collapsed, onToggleCollapse, className }: SidebarProps
           </div>
         )}
 
-        {navItems.map((item) => {
+        {displayedItems.map((item) => {
           const Icon = item.icon;
           const isActive =
             pathname === item.href ||
@@ -188,10 +215,10 @@ export function Sidebar({ collapsed, onToggleCollapse, className }: SidebarProps
         <div className="p-4 border-t border-slate-800/80 text-[11px] text-slate-500">
           <div className="flex items-center justify-between">
             <span>SkillSync AI</span>
-            <span className="text-indigo-400 font-mono">v0.1.0</span>
+            <span className="text-indigo-400 font-mono">v0.3.0</span>
           </div>
           <div className="text-[10px] text-slate-600 mt-0.5">
-            Phase 1 • Dynamic Shell
+            Phase 2 • Auth &amp; RBAC
           </div>
         </div>
       )}
