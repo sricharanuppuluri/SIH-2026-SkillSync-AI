@@ -11,6 +11,7 @@ __pypackages__/
 frontend/.next/
 frontend/out/
 frontend/build/
+*.tsbuildinfo
 .next/
 out/
 build/
