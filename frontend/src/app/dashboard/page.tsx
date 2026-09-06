@@ -2,12 +2,19 @@
 
 import * as React from "react";
 import { Briefcase, Cpu, GraduationCap, Award } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { SystemStatus } from "@/components/dashboard/SystemStatus";
 import { QuickActions } from "@/components/dashboard/QuickActions";
+import { CandidateDashboard } from "@/components/candidate/CandidateDashboard";
+import { EmployerDashboard } from "@/components/employer/EmployerDashboard";
+import TrainingProviderDashboardPage from "@/app/training-provider/dashboard/page";
+import { LoadingState } from "@/components/ui/LoadingState";
 
 export default function DashboardPage() {
+  const { user, isLoading } = useAuth();
+
   const metrics = [
     {
       title: "Active Opportunities",
@@ -46,6 +53,25 @@ export default function DashboardPage() {
       iconColor: "text-amber-400 bg-amber-500/10 border-amber-500/20",
     },
   ];
+
+  if (isLoading) {
+    return <LoadingState message="Loading dashboard environment..." className="py-20" />;
+  }
+
+  // If authenticated as EMPLOYER, render dedicated live Employer Dashboard
+  if (user?.role === "EMPLOYER") {
+    return <EmployerDashboard />;
+  }
+
+  // If authenticated as CANDIDATE, render dedicated live Candidate Dashboard
+  if (user?.role === "CANDIDATE") {
+    return <CandidateDashboard />;
+  }
+
+  // If authenticated as TRAINING_PROVIDER, redirect or render Training Provider Dashboard
+  if (user?.role === "TRAINING_PROVIDER") {
+    return <TrainingProviderDashboardPage />;
+  }
 
   return (
     <div className="space-y-8">

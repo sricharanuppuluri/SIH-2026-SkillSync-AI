@@ -2,21 +2,49 @@
 
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import health
+from app.api.v1.endpoints import (
+    auth,
+    candidate,
+    candidate_learning,
+    copilot,
+    courses,
+    employer,
+    health,
+    jobs,
+    profiles,
+    rbac_test,
+    skills,
+    training_provider,
+)
 
 api_router = APIRouter()
 
 # Phase 0: System Health & Diagnostics
 api_router.include_router(health.router, tags=["Health"])
 
-# Future Phase Modules (Ready to be mounted):
-# api_router.include_router(auth.router, prefix="/auth", tags=["Authentication & RBAC"])
-# api_router.include_router(jobs.router, prefix="/jobs", tags=["Employer Jobs"])
-# api_router.include_router(candidates.router, prefix="/candidates", tags=["Candidate Profiles"])
-# api_router.include_router(skills.router, prefix="/skills", tags=["Skill Taxonomy"])
-# api_router.include_router(matching.router, prefix="/matching", tags=["Matching Engine"])
-# api_router.include_router(copilot.router, prefix="/copilot", tags=["Career Copilot"])
-# api_router.include_router(curriculum.router, prefix="/curriculum", tags=["Curriculum Optimizer"])
-# api_router.include_router(demand.router, prefix="/demand", tags=["Demand Forecasting"])
-# api_router.include_router(passport.router, prefix="/passport", tags=["Skill Passport"])
-# api_router.include_router(outcomes.router, prefix="/outcomes", tags=["Outcome Intelligence"])
+# Phase 2: Authentication & RBAC
+api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
+api_router.include_router(rbac_test.router, tags=["RBAC Verification"])
+
+# Phase 3: Core Domain Foundation Endpoints
+api_router.include_router(skills.router, prefix="/skills", tags=["Skills Taxonomy"])
+api_router.include_router(jobs.router, prefix="/jobs", tags=["Jobs"])
+api_router.include_router(courses.router, prefix="/courses", tags=["Courses"])
+api_router.include_router(profiles.router, prefix="/profiles", tags=["Profiles"])
+
+# Phase 4: Employer Module Endpoints
+api_router.include_router(employer.router, prefix="/employer", tags=["Employer Module"])
+
+# Phase 7: Candidate Module Endpoints
+api_router.include_router(candidate.router, prefix="/candidate", tags=["Candidate Module"])
+
+# Phase 10: AI Career Copilot Endpoints
+api_router.include_router(copilot.router, prefix="/candidate/copilot", tags=["AI Career Copilot"])
+
+# Phase 11: Training Provider & Curriculum Module Endpoints
+api_router.include_router(
+    training_provider.router, prefix="/training-provider", tags=["Training Provider Module"]
+)
+api_router.include_router(
+    candidate_learning.router, prefix="/candidate/learning", tags=["Candidate Learning Module"]
+)

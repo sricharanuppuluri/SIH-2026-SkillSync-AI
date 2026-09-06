@@ -12,10 +12,18 @@ import {
   Award,
   BarChart3,
   Settings,
+  Users,
+  Building2,
+  User as UserIcon,
+  Sparkles,
+  Bot,
+  BookOpen,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
+import { UserRole } from "@/types";
 
 export interface NavItem {
   title: string;
@@ -33,46 +41,108 @@ export const navItems: NavItem[] = [
     status: "available",
   },
   {
+    title: "Career Copilot",
+    href: "/candidate/copilot",
+    icon: Bot,
+    status: "available",
+  },
+  {
+    title: "My Profile",
+    href: "/candidate/profile",
+    icon: UserIcon,
+    status: "available",
+  },
+  {
+    title: "My Skills",
+    href: "/candidate/skills",
+    icon: Cpu,
+    status: "available",
+  },
+  {
+    title: "Work Experience",
+    href: "/candidate/experience",
+    icon: Briefcase,
+    status: "available",
+  },
+  {
+    title: "Education",
+    href: "/candidate/education",
+    icon: GraduationCap,
+    status: "available",
+  },
+  {
+    title: "Manage Jobs",
+    href: "/employer/jobs",
+    icon: Briefcase,
+    status: "available",
+  },
+  {
+    title: "Review Applicants",
+    href: "/employer/applications",
+    icon: Users,
+    status: "available",
+  },
+  {
+    title: "Company Profile",
+    href: "/employer/profile",
+    icon: Building2,
+    status: "available",
+  },
+  {
     title: "Jobs Requisitions",
     href: "/jobs",
     icon: Briefcase,
-    status: "coming-soon",
-    phase: "Phase 3",
+    status: "available",
   },
   {
     title: "Skill Taxonomy",
-    href: "/skills",
+    href: "/admin/skills",
     icon: Cpu,
-    status: "coming-soon",
-    phase: "Phase 5",
+    status: "available",
   },
   {
-    title: "Curriculum & Courses",
-    href: "/learning",
-    icon: GraduationCap,
-    status: "coming-soon",
-    phase: "Phase 8",
+    title: "AI Skill Extractor",
+    href: "/tools/skill-extractor",
+    icon: Sparkles,
+    status: "available",
   },
   {
     title: "Semantic Matching",
-    href: "/matching",
+    href: "/tools/semantic-skill-match",
     icon: GitCompare,
-    status: "coming-soon",
-    phase: "Phase 6",
+    status: "available",
+  },
+  {
+    title: "Curriculum & Courses",
+    href: "/candidate/learning",
+    icon: GraduationCap,
+    status: "available",
+  },
+  {
+    title: "Manage Courses",
+    href: "/training-provider/courses",
+    icon: BookOpen,
+    status: "available",
+  },
+  {
+    title: "Provider Profile",
+    href: "/training-provider/profile",
+    icon: Building2,
+    status: "available",
   },
   {
     title: "Skill Passport",
     href: "/passport",
     icon: Award,
     status: "coming-soon",
-    phase: "Phase 10",
+    phase: "Phase 12",
   },
   {
     title: "Outcome Analytics",
     href: "/analytics",
     icon: BarChart3,
     status: "coming-soon",
-    phase: "Phase 11",
+    phase: "Phase 13",
   },
   {
     title: "Settings",
@@ -82,6 +152,68 @@ export const navItems: NavItem[] = [
   },
 ];
 
+export const ROLE_NAV_PERMISSIONS: Record<UserRole, string[]> = {
+  CANDIDATE: [
+    "/dashboard",
+    "/candidate/copilot",
+    "/candidate/profile",
+    "/candidate/skills",
+    "/candidate/experience",
+    "/candidate/education",
+    "/candidate/learning",
+    "/tools/skill-extractor",
+    "/tools/semantic-skill-match",
+    "/jobs",
+    "/settings",
+  ],
+  EMPLOYER: [
+    "/dashboard",
+    "/employer/jobs",
+    "/employer/applications",
+    "/employer/profile",
+    "/tools/skill-extractor",
+    "/tools/semantic-skill-match",
+    "/jobs",
+    "/settings",
+  ],
+  TRAINING_PROVIDER: [
+    "/dashboard",
+    "/training-provider/courses",
+    "/training-provider/profile",
+    "/tools/skill-extractor",
+    "/tools/semantic-skill-match",
+    "/settings",
+  ],
+  GOVERNMENT: [
+    "/dashboard",
+    "/tools/skill-extractor",
+    "/tools/semantic-skill-match",
+    "/analytics",
+    "/settings",
+  ],
+  ADMIN: [
+    "/dashboard",
+    "/candidate/copilot",
+    "/candidate/profile",
+    "/candidate/skills",
+    "/candidate/experience",
+    "/candidate/education",
+    "/candidate/learning",
+    "/employer/jobs",
+    "/employer/applications",
+    "/employer/profile",
+    "/training-provider/courses",
+    "/training-provider/profile",
+    "/jobs",
+    "/admin/skills",
+    "/tools/skill-extractor",
+    "/tools/semantic-skill-match",
+    "/passport",
+    "/analytics",
+    "/settings",
+  ],
+};
+
 interface SidebarProps {
   collapsed: boolean;
   onToggleCollapse: () => void;
@@ -90,6 +222,14 @@ interface SidebarProps {
 
 export function Sidebar({ collapsed, onToggleCollapse, className }: SidebarProps) {
   const pathname = usePathname();
+  const { user } = useAuth();
+
+  const displayedItems = React.useMemo(() => {
+    if (!user || !user.role || !ROLE_NAV_PERMISSIONS[user.role]) {
+      return navItems;
+    }
+    return navItems.filter((item) => ROLE_NAV_PERMISSIONS[user.role].includes(item.href));
+  }, [user]);
 
   return (
     <aside
@@ -114,7 +254,7 @@ export function Sidebar({ collapsed, onToggleCollapse, className }: SidebarProps
                 SkillSync <span className="text-indigo-400">AI</span>
               </span>
               <span className="text-[10px] text-slate-400 font-mono">
-                Modular Monolith
+                {user ? `${user.role} Portal` : "Modular Monolith"}
               </span>
             </div>
           )}
@@ -138,7 +278,7 @@ export function Sidebar({ collapsed, onToggleCollapse, className }: SidebarProps
           </div>
         )}
 
-        {navItems.map((item) => {
+        {displayedItems.map((item) => {
           const Icon = item.icon;
           const isActive =
             pathname === item.href ||
@@ -188,10 +328,10 @@ export function Sidebar({ collapsed, onToggleCollapse, className }: SidebarProps
         <div className="p-4 border-t border-slate-800/80 text-[11px] text-slate-500">
           <div className="flex items-center justify-between">
             <span>SkillSync AI</span>
-            <span className="text-indigo-400 font-mono">v0.1.0</span>
+            <span className="text-indigo-400 font-mono">v0.6.0</span>
           </div>
           <div className="text-[10px] text-slate-600 mt-0.5">
-            Phase 1 • Dynamic Shell
+            Phase 5 • Skill Intelligence
           </div>
         </div>
       )}

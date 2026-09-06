@@ -5,6 +5,7 @@ import { AppShell } from "./AppShell";
 // Mock next/navigation
 vi.mock("next/navigation", () => ({
   usePathname: () => "/dashboard",
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
 }));
 
 // Mock the API client
