@@ -75,13 +75,7 @@ export interface JobUpdatePayload {
   skills?: JobSkillRequirement[];
 }
 
-export interface Skill {
-  id: string;
-  name: string;
-  normalized_name: string;
-  category: string;
-  description?: string | null;
-}
+export type { Skill } from "./skill";
 
 export interface CandidateInfo {
   id: string;

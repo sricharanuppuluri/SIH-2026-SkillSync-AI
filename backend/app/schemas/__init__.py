@@ -56,7 +56,13 @@ from app.schemas.profiles import (
     TrainingProviderProfileUpdate,
 )
 from app.schemas.skill import (
+    SkillAliasCreate,
+    SkillAliasResponse,
+    SkillCatalogItem,
     SkillCreate,
+    SkillDetailResponse,
+    SkillRelationshipCreate,
+    SkillRelationshipResponse,
     SkillResponse,
     SkillUpdate,
 )
@@ -95,7 +101,13 @@ __all__ = [
     "JobSkillRequirement",
     "JobSkillResponse",
     "JobUpdate",
+    "SkillAliasCreate",
+    "SkillAliasResponse",
+    "SkillCatalogItem",
     "SkillCreate",
+    "SkillDetailResponse",
+    "SkillRelationshipCreate",
+    "SkillRelationshipResponse",
     "SkillResponse",
     "SkillUpdate",
     "TokenPayload",

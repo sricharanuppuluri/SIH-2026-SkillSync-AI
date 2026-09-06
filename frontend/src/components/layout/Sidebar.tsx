@@ -62,10 +62,9 @@ export const navItems: NavItem[] = [
   },
   {
     title: "Skill Taxonomy",
-    href: "/skills",
+    href: "/admin/skills",
     icon: Cpu,
-    status: "coming-soon",
-    phase: "Phase 5",
+    status: "available",
   },
   {
     title: "Curriculum & Courses",
@@ -104,7 +103,7 @@ export const navItems: NavItem[] = [
 ];
 
 export const ROLE_NAV_PERMISSIONS: Record<UserRole, string[]> = {
-  CANDIDATE: ["/dashboard", "/skills", "/learning", "/matching", "/passport", "/settings"],
+  CANDIDATE: ["/dashboard", "/learning", "/matching", "/passport", "/settings"],
   EMPLOYER: [
     "/dashboard",
     "/employer/jobs",
@@ -122,7 +121,7 @@ export const ROLE_NAV_PERMISSIONS: Record<UserRole, string[]> = {
     "/employer/applications",
     "/employer/profile",
     "/jobs",
-    "/skills",
+    "/admin/skills",
     "/learning",
     "/matching",
     "/passport",
@@ -245,10 +244,10 @@ export function Sidebar({ collapsed, onToggleCollapse, className }: SidebarProps
         <div className="p-4 border-t border-slate-800/80 text-[11px] text-slate-500">
           <div className="flex items-center justify-between">
             <span>SkillSync AI</span>
-            <span className="text-indigo-400 font-mono">v0.3.0</span>
+            <span className="text-indigo-400 font-mono">v0.6.0</span>
           </div>
           <div className="text-[10px] text-slate-600 mt-0.5">
-            Phase 2 • Auth &amp; RBAC
+            Phase 5 • Skill Intelligence
           </div>
         </div>
       )}

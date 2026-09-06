@@ -165,15 +165,115 @@ export const authAPI = {
 };
 
 /**
- * Skills Taxonomy API methods.
+ * Skills Taxonomy and Canonical Intelligence API methods.
  */
 export const skillsAPI = {
-  async list(params?: { search?: string; category?: string }): Promise<import("@/types").Skill[]> {
+  async catalog(params?: {
+    search?: string;
+    category?: string;
+    skill_type?: string;
+    skip?: number;
+    limit?: number;
+  }): Promise<import("@/types").SkillCatalogItem[]> {
     const query = new URLSearchParams();
     if (params?.search) query.set("search", params.search);
     if (params?.category) query.set("category", params.category);
+    if (params?.skill_type) query.set("skill_type", params.skill_type);
+    if (params?.skip !== undefined) query.set("skip", params.skip.toString());
+    if (params?.limit !== undefined) query.set("limit", params.limit.toString());
+    const qs = query.toString();
+    return fetchAPI<import("@/types").SkillCatalogItem[]>(`/api/v1/skills/catalog${qs ? `?${qs}` : ""}`);
+  },
+
+  async list(params?: {
+    category?: string;
+    skill_type?: string;
+    skill_status?: string;
+    search?: string;
+    parent_skill_id?: string;
+    skip?: number;
+    limit?: number;
+  }): Promise<import("@/types").Skill[]> {
+    const query = new URLSearchParams();
+    if (params?.category) query.set("category", params.category);
+    if (params?.skill_type) query.set("skill_type", params.skill_type);
+    if (params?.skill_status) query.set("skill_status", params.skill_status);
+    if (params?.search) query.set("search", params.search);
+    if (params?.parent_skill_id) query.set("parent_skill_id", params.parent_skill_id);
+    if (params?.skip !== undefined) query.set("skip", params.skip.toString());
+    if (params?.limit !== undefined) query.set("limit", params.limit.toString());
     const qs = query.toString();
     return fetchAPI<import("@/types").Skill[]>(`/api/v1/skills${qs ? `?${qs}` : ""}`);
+  },
+
+  async get(id: string): Promise<import("@/types").SkillDetail> {
+    return fetchAPI<import("@/types").SkillDetail>(`/api/v1/skills/${id}`);
+  },
+
+  async create(payload: import("@/types").SkillCreateInput): Promise<import("@/types").Skill> {
+    return fetchAPI<import("@/types").Skill>("/api/v1/skills", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async update(id: string, payload: import("@/types").SkillUpdateInput): Promise<import("@/types").Skill> {
+    return fetchAPI<import("@/types").Skill>(`/api/v1/skills/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async delete(id: string): Promise<void> {
+    return fetchAPI<void>(`/api/v1/skills/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  async resolve(queryText: string): Promise<import("@/types").Skill | null> {
+    return fetchAPI<import("@/types").Skill | null>(
+      `/api/v1/skills/resolve?query=${encodeURIComponent(queryText)}`
+    );
+  },
+
+  async listAliases(skillId: string): Promise<import("@/types").SkillAlias[]> {
+    return fetchAPI<import("@/types").SkillAlias[]>(`/api/v1/skills/${skillId}/aliases`);
+  },
+
+  async addAlias(
+    skillId: string,
+    payload: import("@/types").SkillAliasCreateInput
+  ): Promise<import("@/types").SkillAlias> {
+    return fetchAPI<import("@/types").SkillAlias>(`/api/v1/skills/${skillId}/aliases`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async deleteAlias(skillId: string, aliasId: string): Promise<void> {
+    return fetchAPI<void>(`/api/v1/skills/${skillId}/aliases/${aliasId}`, {
+      method: "DELETE",
+    });
+  },
+
+  async listRelationships(skillId: string): Promise<import("@/types").SkillRelationship[]> {
+    return fetchAPI<import("@/types").SkillRelationship[]>(`/api/v1/skills/${skillId}/relationships`);
+  },
+
+  async addRelationship(
+    skillId: string,
+    payload: import("@/types").SkillRelationshipCreateInput
+  ): Promise<import("@/types").SkillRelationship> {
+    return fetchAPI<import("@/types").SkillRelationship>(`/api/v1/skills/${skillId}/relationships`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async deleteRelationship(skillId: string, relationshipId: string): Promise<void> {
+    return fetchAPI<void>(`/api/v1/skills/${skillId}/relationships/${relationshipId}`, {
+      method: "DELETE",
+    });
   },
 };
 

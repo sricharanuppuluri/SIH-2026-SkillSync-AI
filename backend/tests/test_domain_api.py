@@ -60,7 +60,7 @@ async def test_skills_api_crud_and_rbac(async_client: AsyncClient) -> None:
     )
     assert res.status_code == 403
 
-    # 3. Employer creating skill -> 201 Created
+    # 3. Employer creating skill -> 403 Forbidden (Admin only in Phase 5)
     _, emp_token = await create_api_test_user(f"emp_sk_{suffix}@api.internal", UserRole.EMPLOYER)
     res = await async_client.post(
         "/api/v1/skills",
@@ -71,16 +71,29 @@ async def test_skills_api_crud_and_rbac(async_client: AsyncClient) -> None:
         },
         headers={"Authorization": f"Bearer {emp_token}"},
     )
+    assert res.status_code == 403
+
+    # 4. Admin creating skill -> 201 Created
+    _, admin_token = await create_api_test_user(f"adm_sk_{suffix}@api.internal", UserRole.ADMIN)
+    res = await async_client.post(
+        "/api/v1/skills",
+        json={
+            "name": f"Rust Lang {suffix}",
+            "category": "Systems",
+            "description": "Systems programming",
+        },
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
     assert res.status_code == 201
     created_skill = res.json()
     assert created_skill["name"] == f"Rust Lang {suffix}"
     skill_id = created_skill["id"]
 
-    # 4. Duplicate skill creation -> 409 Conflict
+    # 5. Duplicate skill creation -> 409 Conflict
     res = await async_client.post(
         "/api/v1/skills",
         json={"name": f"rust lang {suffix}", "category": "Systems"},
-        headers={"Authorization": f"Bearer {emp_token}"},
+        headers={"Authorization": f"Bearer {admin_token}"},
     )
     assert res.status_code == 409
 

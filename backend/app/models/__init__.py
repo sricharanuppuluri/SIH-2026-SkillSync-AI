@@ -12,7 +12,14 @@ from app.models.profiles import (
     GovernmentProfile,
     TrainingProviderProfile,
 )
-from app.models.skill import Skill
+from app.models.skill import (
+    Skill,
+    SkillAlias,
+    SkillRelationship,
+    SkillRelationshipType,
+    SkillStatus,
+    SkillType,
+)
 from app.models.user import User, UserRole
 
 __all__ = [
@@ -35,6 +42,11 @@ __all__ = [
     "JobStatus",
     "ProficiencyLevel",
     "Skill",
+    "SkillAlias",
+    "SkillRelationship",
+    "SkillRelationshipType",
+    "SkillStatus",
+    "SkillType",
     "TimestampMixin",
     "TrainingProviderProfile",
     "UUIDPrimaryKeyMixin",
