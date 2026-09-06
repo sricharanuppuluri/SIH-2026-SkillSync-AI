@@ -40,8 +40,7 @@ async def check_ollama_status() -> dict[str, Any]:
             "latency_ms": latency_ms,
             "target_model": settings.OLLAMA_MODEL,
             "message": (
-                "Local Ollama daemon is offline or not installed. "
-                "Local AI features disabled."
+                "Local Ollama daemon is offline or not installed. Local AI features disabled."
             ),
             "error": str(e),
         }

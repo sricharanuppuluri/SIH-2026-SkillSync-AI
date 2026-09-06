@@ -19,6 +19,15 @@ from app.schemas.course import (
     CourseSkillResponse,
     CourseUpdate,
 )
+from app.schemas.employer import (
+    EmployerApplicationCandidateInfo,
+    EmployerApplicationResponse,
+    EmployerApplicationStatusUpdate,
+    EmployerDashboardMetrics,
+    EmployerDashboardResponse,
+    EmployerRecentApplicationItem,
+    EmployerRecentJobItem,
+)
 from app.schemas.enrollment import (
     EnrollmentCreate,
     EnrollmentResponse,
@@ -64,9 +73,16 @@ __all__ = [
     "CourseSkillRequirement",
     "CourseSkillResponse",
     "CourseUpdate",
+    "EmployerApplicationCandidateInfo",
+    "EmployerApplicationResponse",
+    "EmployerApplicationStatusUpdate",
+    "EmployerDashboardMetrics",
+    "EmployerDashboardResponse",
     "EmployerProfileCreate",
     "EmployerProfileResponse",
     "EmployerProfileUpdate",
+    "EmployerRecentApplicationItem",
+    "EmployerRecentJobItem",
     "EnrollmentCreate",
     "EnrollmentResponse",
     "EnrollmentUpdate",

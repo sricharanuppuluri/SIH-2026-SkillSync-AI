@@ -163,3 +163,136 @@ export const authAPI = {
     }
   },
 };
+
+/**
+ * Skills Taxonomy API methods.
+ */
+export const skillsAPI = {
+  async list(params?: { search?: string; category?: string }): Promise<import("@/types").Skill[]> {
+    const query = new URLSearchParams();
+    if (params?.search) query.set("search", params.search);
+    if (params?.category) query.set("category", params.category);
+    const qs = query.toString();
+    return fetchAPI<import("@/types").Skill[]>(`/api/v1/skills${qs ? `?${qs}` : ""}`);
+  },
+};
+
+/**
+ * Employer Portal API methods.
+ */
+export const employerAPI = {
+  async getDashboard(): Promise<import("@/types").EmployerDashboardData> {
+    return fetchAPI<import("@/types").EmployerDashboardData>("/api/v1/employer/dashboard");
+  },
+
+  async getJobs(params?: {
+    status?: string;
+    search?: string;
+    skip?: number;
+    limit?: number;
+  }): Promise<import("@/types").Job[]> {
+    const query = new URLSearchParams();
+    if (params?.status) query.set("status", params.status);
+    if (params?.search) query.set("search", params.search);
+    if (params?.skip !== undefined) query.set("skip", params.skip.toString());
+    if (params?.limit !== undefined) query.set("limit", params.limit.toString());
+    const qs = query.toString();
+    return fetchAPI<import("@/types").Job[]>(`/api/v1/employer/jobs${qs ? `?${qs}` : ""}`);
+  },
+
+  async getJob(jobId: string): Promise<import("@/types").Job> {
+    return fetchAPI<import("@/types").Job>(`/api/v1/employer/jobs/${jobId}`);
+  },
+
+  async createJob(payload: import("@/types").JobCreatePayload): Promise<import("@/types").Job> {
+    return fetchAPI<import("@/types").Job>("/api/v1/employer/jobs", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async updateJob(
+    jobId: string,
+    payload: import("@/types").JobUpdatePayload
+  ): Promise<import("@/types").Job> {
+    return fetchAPI<import("@/types").Job>(`/api/v1/employer/jobs/${jobId}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async publishJob(jobId: string): Promise<import("@/types").Job> {
+    return fetchAPI<import("@/types").Job>(`/api/v1/employer/jobs/${jobId}/publish`, {
+      method: "PUT",
+    });
+  },
+
+  async closeJob(jobId: string): Promise<import("@/types").Job> {
+    return fetchAPI<import("@/types").Job>(`/api/v1/employer/jobs/${jobId}/close`, {
+      method: "PUT",
+    });
+  },
+
+  async deleteJob(jobId: string): Promise<{ message: string; id: string }> {
+    return fetchAPI<{ message: string; id: string }>(`/api/v1/employer/jobs/${jobId}`, {
+      method: "DELETE",
+    });
+  },
+
+  async getApplications(params?: {
+    jobId?: string;
+    status?: string;
+    skip?: number;
+    limit?: number;
+  }): Promise<import("@/types").EmployerApplication[]> {
+    const query = new URLSearchParams();
+    if (params?.jobId) query.set("job_id", params.jobId);
+    if (params?.status) query.set("status", params.status);
+    if (params?.skip !== undefined) query.set("skip", params.skip.toString());
+    if (params?.limit !== undefined) query.set("limit", params.limit.toString());
+    const qs = query.toString();
+    return fetchAPI<import("@/types").EmployerApplication[]>(
+      `/api/v1/employer/applications${qs ? `?${qs}` : ""}`
+    );
+  },
+
+  async getJobApplications(
+    jobId: string,
+    status?: string
+  ): Promise<import("@/types").EmployerApplication[]> {
+    const query = new URLSearchParams();
+    if (status) query.set("status", status);
+    const qs = query.toString();
+    return fetchAPI<import("@/types").EmployerApplication[]>(
+      `/api/v1/employer/jobs/${jobId}/applications${qs ? `?${qs}` : ""}`
+    );
+  },
+
+  async updateApplicationStatus(
+    applicationId: string,
+    status: import("@/types").ApplicationStatus
+  ): Promise<import("@/types").EmployerApplication> {
+    return fetchAPI<import("@/types").EmployerApplication>(
+      `/api/v1/employer/applications/${applicationId}/status`,
+      {
+        method: "PUT",
+        body: JSON.stringify({ status }),
+      }
+    );
+  },
+
+  async getProfile(): Promise<{ role: string; profile: import("@/types").EmployerProfile }> {
+    return fetchAPI<{ role: string; profile: import("@/types").EmployerProfile }>(
+      "/api/v1/profiles/me"
+    );
+  },
+
+  async updateProfile(
+    payload: import("@/types").EmployerProfileUpdatePayload
+  ): Promise<import("@/types").EmployerProfile> {
+    return fetchAPI<import("@/types").EmployerProfile>("/api/v1/profiles/me/employer", {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+  },
+};

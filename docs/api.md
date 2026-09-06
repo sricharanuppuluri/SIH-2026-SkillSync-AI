@@ -196,3 +196,125 @@ SkillSync AI defines 5 distinct RBAC roles:
   - Auth: `TRAINING_PROVIDER`, `ADMIN`
 - **Update Government Profile**: `PUT /api/v1/profiles/me/government`
   - Auth: `GOVERNMENT`, `ADMIN`
+
+---
+
+## 6. Employer Module Endpoints (Phase 4 — Active)
+
+### 6.1 Security & Ownership Model
+- **Ownership Isolation**: An employer can only access and modify job requisitions and candidate applications belonging directly to their own `EmployerProfile`. Attempts to access another employer's resources return HTTP `404 Not Found` to prevent entity enumeration.
+- **Role Restriction**: Only users with the `EMPLOYER` role (or platform `ADMIN`) can access `/api/v1/employer/*` routes. Unauthorized roles (such as `CANDIDATE`) receive HTTP `403 Forbidden`.
+- **Identity Derivation**: `employer_id` is never accepted from request bodies or client query parameters; it is derived strictly from the authenticated JWT token.
+
+---
+
+### 6.2 Employer Dashboard (`/api/v1/employer/dashboard`)
+
+- **Method**: `GET`
+- **Route**: `/api/v1/employer/dashboard`
+- **Auth Required**: `EMPLOYER`, `ADMIN`
+- **Description**: Returns live, database-calculated metrics and recent activity for the authenticated employer. Zero hardcoded/mocked figures.
+
+```json
+// Response (200 OK)
+{
+  "metrics": {
+    "total_jobs": 8,
+    "published_jobs": 5,
+    "draft_jobs": 2,
+    "closed_jobs": 1,
+    "total_applications": 14,
+    "applications_by_status": {
+      "APPLIED": 6,
+      "SHORTLISTED": 4,
+      "INTERVIEW": 2,
+      "OFFERED": 1,
+      "HIRED": 1,
+      "REJECTED": 0
+    }
+  },
+  "recent_jobs": [
+    {
+      "id": "84cfa976-1b48-4395-9ff2-8db4ea470f1a",
+      "title": "Senior Backend Engineer",
+      "status": "PUBLISHED",
+      "location_city": "San Francisco",
+      "applications_count": 5,
+      "skills_count": 4,
+      "created_at": "2026-09-06T12:00:00Z"
+    }
+  ],
+  "recent_applications": [
+    {
+      "id": "f51950e3-9ad0-4d40-aa21-f1eb9c9b54c8",
+      "candidate_id": "8e3c4568-3e4b-4b2a-a957-619f71c49b01",
+      "candidate_name": "Aarav Sharma",
+      "candidate_headline": "Full-Stack Software Engineer",
+      "job_id": "84cfa976-1b48-4395-9ff2-8db4ea470f1a",
+      "job_title": "Senior Backend Engineer",
+      "status": "APPLIED",
+      "applied_at": "2026-09-06T14:30:00Z"
+    }
+  ]
+}
+```
+
+---
+
+### 6.3 Employer Job Requisition CRUD (`/api/v1/employer/jobs`)
+
+- **List Employer Jobs**: `GET /api/v1/employer/jobs`
+  - Query Params: `status` (`DRAFT`, `PUBLISHED`, `CLOSED`), `search` (text search), `skip`, `limit`
+  - Returns: Array of employer-owned jobs with skills and applications counts.
+- **Get Employer Job**: `GET /api/v1/employer/jobs/{job_id}`
+  - Returns: Single job if owned by employer; HTTP 404 otherwise.
+- **Create Employer Job**: `POST /api/v1/employer/jobs`
+  - Payload:
+    ```json
+    {
+      "title": "Senior Machine Learning Engineer",
+      "description": "Develop and deploy scalable inference pipelines.",
+      "location_city": "Austin",
+      "location_state": "TX",
+      "is_remote": true,
+      "employment_type": "FULL_TIME",
+      "experience_level": "SENIOR",
+      "status": "DRAFT",
+      "salary_min": 140000,
+      "salary_max": 185000,
+      "skills": [
+        {
+          "skill_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "is_required": true,
+          "minimum_proficiency": "ADVANCED",
+          "weight": 1.5
+        }
+      ]
+    }
+    ```
+- **Update Employer Job**: `PUT /api/v1/employer/jobs/{job_id}`
+  - Partial or complete update of job attributes and skill specifications.
+- **Delete Employer Job**: `DELETE /api/v1/employer/jobs/{job_id}`
+  - Permanently removes job and cascades deletion of attached `JobSkill` associations.
+
+---
+
+### 6.4 Deterministic Job Lifecycle Transitions
+
+- **Publish Job**: `PUT /api/v1/employer/jobs/{job_id}/publish`
+  - Sets `status="PUBLISHED"` and synchronizes `is_active=True`.
+- **Close Job**: `PUT /api/v1/employer/jobs/{job_id}/close`
+  - Sets `status="CLOSED"` and synchronizes `is_active=False`. Closed jobs no longer accept submissions.
+
+---
+
+### 6.5 Applicant Management & Funnel Progression
+
+- **List Applications**: `GET /api/v1/employer/applications`
+  - Query Params: `job_id` (optional filter), `status` (optional filter: `APPLIED`, `SHORTLISTED`, `INTERVIEW`, `OFFERED`, `REJECTED`, `HIRED`)
+  - Response: Includes candidate profile details (name, email, headline, experience years, location) and application metadata.
+- **List Job Applications**: `GET /api/v1/employer/jobs/{job_id}/applications`
+  - Scoped directly to a specific job requisition owned by the employer.
+- **Update Application Status**: `PUT /api/v1/employer/applications/{application_id}/status`
+  - Payload: `{"status": "SHORTLISTED"}` (Allowed values: `APPLIED`, `SHORTLISTED`, `INTERVIEW`, `OFFERED`, `REJECTED`, `HIRED`)
+  - Security: Verifies application belongs to a job owned by the requesting employer.

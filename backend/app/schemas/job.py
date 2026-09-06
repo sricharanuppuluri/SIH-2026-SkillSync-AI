@@ -5,7 +5,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.models.job import EmploymentType, ExperienceLevel
+from app.models.job import EmploymentType, ExperienceLevel, JobStatus
 
 
 class JobSkillRequirement(BaseModel):
@@ -22,6 +22,8 @@ class JobSkillResponse(BaseModel):
 
     id: uuid.UUID
     skill_id: uuid.UUID
+    skill_name: str | None = None
+    category: str | None = None
     is_required: bool
     minimum_proficiency: str
     weight: float
@@ -39,6 +41,7 @@ class JobBase(BaseModel):
     is_remote: bool = False
     employment_type: EmploymentType = EmploymentType.FULL_TIME
     experience_level: ExperienceLevel = ExperienceLevel.MID
+    status: JobStatus = JobStatus.PUBLISHED
     salary_min: float | None = Field(default=None, ge=0)
     salary_max: float | None = Field(default=None, ge=0)
     is_active: bool = True
@@ -60,6 +63,7 @@ class JobUpdate(BaseModel):
     is_remote: bool | None = None
     employment_type: EmploymentType | None = None
     experience_level: ExperienceLevel | None = None
+    status: JobStatus | None = None
     salary_min: float | None = None
     salary_max: float | None = None
     is_active: bool | None = None
@@ -72,6 +76,7 @@ class JobResponse(JobBase):
     id: uuid.UUID
     employer_id: uuid.UUID
     skills: list[JobSkillResponse] = Field(default_factory=list)
+    applications_count: int = 0
     created_at: datetime
     updated_at: datetime
 

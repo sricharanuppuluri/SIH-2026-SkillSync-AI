@@ -2,12 +2,17 @@
 
 import * as React from "react";
 import { Briefcase, Cpu, GraduationCap, Award } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { SystemStatus } from "@/components/dashboard/SystemStatus";
 import { QuickActions } from "@/components/dashboard/QuickActions";
+import { EmployerDashboard } from "@/components/employer/EmployerDashboard";
+import { LoadingState } from "@/components/ui/LoadingState";
 
 export default function DashboardPage() {
+  const { user, isLoading } = useAuth();
+
   const metrics = [
     {
       title: "Active Opportunities",
@@ -46,6 +51,15 @@ export default function DashboardPage() {
       iconColor: "text-amber-400 bg-amber-500/10 border-amber-500/20",
     },
   ];
+
+  if (isLoading) {
+    return <LoadingState message="Loading dashboard environment..." className="py-20" />;
+  }
+
+  // If authenticated as EMPLOYER, render dedicated live Employer Dashboard
+  if (user?.role === "EMPLOYER") {
+    return <EmployerDashboard />;
+  }
 
   return (
     <div className="space-y-8">

@@ -5,6 +5,7 @@ from fastapi import APIRouter
 from app.api.v1.endpoints import (
     auth,
     courses,
+    employer,
     health,
     jobs,
     profiles,
@@ -26,3 +27,6 @@ api_router.include_router(skills.router, prefix="/skills", tags=["Skills Taxonom
 api_router.include_router(jobs.router, prefix="/jobs", tags=["Jobs"])
 api_router.include_router(courses.router, prefix="/courses", tags=["Courses"])
 api_router.include_router(profiles.router, prefix="/profiles", tags=["Profiles"])
+
+# Phase 4: Employer Module Endpoints
+api_router.include_router(employer.router, prefix="/employer", tags=["Employer Module"])

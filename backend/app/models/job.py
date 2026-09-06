@@ -35,6 +35,14 @@ class ExperienceLevel(enum.StrEnum):
     LEAD = "LEAD"
 
 
+class JobStatus(enum.StrEnum):
+    """Lifecycle states for employer job requisitions."""
+
+    DRAFT = "DRAFT"
+    PUBLISHED = "PUBLISHED"
+    CLOSED = "CLOSED"
+
+
 class Job(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     """Employer job posting representing industry workforce demand."""
 
@@ -60,6 +68,12 @@ class Job(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         SQLEnum(ExperienceLevel, name="experience_level", native_enum=True),
         default=ExperienceLevel.MID,
         nullable=False,
+    )
+    status: Mapped[JobStatus] = mapped_column(
+        SQLEnum(JobStatus, name="job_status", native_enum=True),
+        default=JobStatus.PUBLISHED,
+        nullable=False,
+        index=True,
     )
     salary_min: Mapped[float | None] = mapped_column(Float, nullable=True)
     salary_max: Mapped[float | None] = mapped_column(Float, nullable=True)

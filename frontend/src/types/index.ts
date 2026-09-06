@@ -1,4 +1,5 @@
 export * from "./auth";
+export * from "./employer";
 
 export interface DatabaseHealth {
   status: "connected" | "disconnected" | "degraded";
