@@ -15,6 +15,7 @@ from app.api.v1.endpoints import (
     passport,
     profiles,
     rbac_test,
+    simulator,
     skills,
     training_provider,
 )
@@ -56,3 +57,8 @@ api_router.include_router(passport.router, tags=["Verified Skill Passport"])
 
 # Phase 13: Skill Demand Digital Twin Endpoints
 api_router.include_router(demand.router, prefix="/demand", tags=["Skill Demand Digital Twin"])
+
+# Phase 15: What-If Skill Demand Simulator Endpoints
+api_router.include_router(
+    simulator.router, prefix="/simulator", tags=["What-If Skill Demand Simulator"]
+)
