@@ -10,7 +10,7 @@ SkillSync AI is a production-ready, open-source platform that bridges the divide
 ## 📌 Current Status
 
 **Status**: Production-ready application foundation and SIH demonstration environment.  
-- **Completed Phases**: Phases 1 through 19 (End-to-End Ecosystem Integration & SIH Grand Finale Demo).  
+- **Completed Phases**: Phases 1 through 20 (Final SIH Release, UI Polish, & Judge Readiness — `v1.0.0-RC`).  
 - **Test Suite**: 244 backend tests passing, 131 frontend Vitest tests passing, 0 lint warnings/errors, 0 TypeScript errors.  
 - **Alembic Head**: `0012_outcome_intelligence`.  
 - **Demo State**: 100% deterministic, idempotent seeding with safe operator reset capability.
@@ -55,16 +55,16 @@ Provider Performance Index (PPI) & Macro Policy Feedback
 ## 🌟 Major Platform Capabilities
 
 - **Canonical Skill Intelligence**: 50+ normalized canonical skills with aliases, categories, and graph relationships preventing taxonomy drift.
-- **Local AI Skill Extraction**: Zero cloud AI lock-in; uses local Ollama (`llama3`) with deterministic fallback tokenization.
+- **Local AI Skill Extraction**: Zero cloud AI lock-in; uses local Ollama (`mistral:latest` default, configurable via `OLLAMA_MODEL`) with deterministic fallback tokenization.
 - **Semantic Skill Matching**: Powered by PostgreSQL `pgvector` for high-fidelity vector cosine similarity matching.
 - **Explainable Skill Gap Engine**: Categorizes requirements into `MATCHED`, `PARTIAL`, and `MISSING` with tailored training recommendations.
-- **Verified Skill Passport**: Distinguishes self-reported claims from verified competencies backed by course completion records.
-- **Employer Skill Contracts**: Structured hiring agreements with Contract Quality Scoring (>=50 threshold) enforcing hiring rigor.
+- **Verified Skill Passport**: Distinguishes self-reported claims from verified competencies backed by course completion records and secure public share tokens.
+- **Employer Skill Contracts**: Structured, versioned competency agreements enforcing hiring rigor and verifiable evidence prerequisites.
 - **Skill Demand Digital Twin**: Real-time aggregation of active jobs and candidate supply computing shortage ratios across industries and regions.
-- **Statistical Demand Forecasting**: 1-to-12-month horizon projections modeling expected skill growth trajectories.
+- **Statistical Demand Forecasting**: Holt linear exponential smoothing and linear trend models with backtested MAE bounds.
 - **Stateless What-If Simulator**: Policy scenario modeling enabling government simulations without mutating production records.
 - **Employment Outcome Intelligence**: Tracks verified starting salaries, retention milestones, and employer satisfaction ratings.
-- **Provider Performance Index (PPI)**: Objective institutional ranking across deterministic quality tiers (Tier 1 Excellent to Tier 4).
+- **Provider Performance Index (PPI)**: Objective 4-factor institutional ranking across deterministic quality tiers (Tier 1 Excellent to Tier 4).
 - **Strict Privacy & Zero-PII Aggregates**: Zero candidate PII exposed in government, macro analytics, or digital twin endpoints.
 
 ---
@@ -107,7 +107,7 @@ See [Ecosystem Architecture Documentation](docs/architecture/skillsync-e2e-archi
 - **Backend**: [FastAPI](https://fastapi.tiangolo.com/), [SQLAlchemy 2.0](https://www.sqlalchemy.org/) (Async), [Pydantic v2](https://docs.pydantic.dev/), [Alembic](https://alembic.sqlalchemy.org/)
 - **Database & Vectors**: [PostgreSQL 16](https://www.postgresql.org/) with [`pgvector`](https://github.com/pgvector/pgvector)
 - **Cache & Rate Limiting**: [Redis 7](https://redis.io/)
-- **Local AI & Embeddings**: [Ollama](https://ollama.com/) (Llama 3 / Mistral) with offline regex fallback
+- **Local AI & Embeddings**: [Ollama](https://ollama.com/) (`mistral:latest` default) with offline regex fallback, [SentenceTransformers](https://sbert.net/) (`all-MiniLM-L6-v2`)
 - **Testing & Code Quality**: [Pytest](https://pytest.org/), [Ruff](https://astral.sh/ruff), [Vitest](https://vitest.dev/), [ESLint](https://eslint.org/)
 
 ---
@@ -167,7 +167,7 @@ python scripts/run_demo.py --reset --check-only
 | **Training Provider** | `dev.provider@skillsync.internal` | `DevPassword123!` | SkillForge Training Institute (Curriculum Lead) |
 | **Platform Superadmin**| `admin@skillsync.internal` | `DevPassword123!` | System Superuser |
 
-*Refer to [SIH Demo Guide](docs/SIH_DEMO_GUIDE.md) and [SIH Presentation Flow](docs/SIH_FINAL_PRESENTATION_FLOW.md) for full step-by-step presentation scripts.*
+*Refer to [SIH Demo Runbook](docs/SIH_DEMO_RUNBOOK.md) and [SIH Final Rehearsal](docs/SIH_FINAL_REHEARSAL.md) for full step-by-step presentation scripts.*
 
 ---
 

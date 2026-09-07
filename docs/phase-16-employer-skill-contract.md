@@ -128,8 +128,8 @@ If a contract requirement specifies `evidence_type = "VERIFIED_SKILL"`, the engi
 ### 5.4 Semantic Matching (Phase 9)
 Semantic match scores reflect profile conceptual similarity, but contract compliance strictly evaluates proficiency and evidence criteria, preventing semantic similarity from bypassing mandatory contractual standards.
 
-### 5.5 Market Demand Twin (Phase 13) & Holt-Winters Forecasting (Phase 14)
-The contract insights engine aggregates real-time market demand, verified vs self-declared supply, shortage ratios, and 6-month Holt-Winters forecast trends.
+### 5.5 Market Demand Twin (Phase 13) & Holt Linear Forecasting (Phase 14)
+The contract insights engine aggregates real-time market demand, verified vs self-declared supply, shortage ratios, and 6-month Holt linear forecast trends.
 
 ### 5.6 What-If Simulator (Phase 15)
 Market insight cards provide 1-click deep links to `/simulator?skill_id={id}` for exploring demand surges and supply training interventions without mutating real platform records.
