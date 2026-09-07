@@ -18,15 +18,20 @@ import {
   BarChart3,
   ChevronUp,
   ChevronDown,
+  Sparkles,
+  Calendar,
 } from "lucide-react";
 import {
   getDemandOverview,
   listSkillDemand,
+  getDemandForecastOverview,
 } from "@/lib/demandApi";
 import type {
   DemandOverviewResponse,
   SkillDemandSummaryItem,
   SkillShortageStatus,
+  GlobalForecastOverviewResponse,
+  DemandGrowthTrend,
 } from "@/types/demand";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -49,6 +54,22 @@ function shortageColor(status: SkillShortageStatus): string {
   }
 }
 
+function growthColor(trend: DemandGrowthTrend): string {
+  switch (trend) {
+    case "INCREASING": return "#22c55e";
+    case "DECLINING": return "#ef4444";
+    case "STABLE": return "#38bdf8";
+  }
+}
+
+function formatModelName(model: string): string {
+  switch (model) {
+    case "holt": return "Holt ES";
+    case "linear_trend": return "Linear Trend";
+    case "baseline_fallback": return "Baseline";
+    default: return model;
+  }
+}
 
 function ShortageIcon({ status }: { status: SkillShortageStatus }) {
   switch (status) {
@@ -68,11 +89,13 @@ function KpiCard({
   label,
   value,
   accent,
+  subtitle,
 }: {
   icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   label: string;
   value: string | number;
   accent: string;
+  subtitle?: string;
 }) {
   return (
     <div
@@ -80,10 +103,10 @@ function KpiCard({
         background: "rgba(255,255,255,0.04)",
         border: "1px solid rgba(255,255,255,0.08)",
         borderRadius: "16px",
-        padding: "24px",
+        padding: "20px",
         display: "flex",
         flexDirection: "column",
-        gap: "12px",
+        gap: "10px",
         backdropFilter: "blur(12px)",
         transition: "transform 0.2s, box-shadow 0.2s",
       }}
@@ -98,9 +121,9 @@ function KpiCard({
     >
       <div
         style={{
-          width: "44px",
-          height: "44px",
-          borderRadius: "12px",
+          width: "40px",
+          height: "40px",
+          borderRadius: "10px",
           background: `${accent}20`,
           display: "flex",
           alignItems: "center",
@@ -112,7 +135,7 @@ function KpiCard({
       <div>
         <div
           style={{
-            fontSize: "28px",
+            fontSize: "26px",
             fontWeight: "700",
             color: "#f1f5f9",
             lineHeight: 1.1,
@@ -121,6 +144,9 @@ function KpiCard({
           {typeof value === "number" ? value.toLocaleString() : value}
         </div>
         <div style={{ fontSize: "13px", color: "#94a3b8", marginTop: "4px" }}>{label}</div>
+        {subtitle && (
+          <div style={{ fontSize: "11px", color: "#64748b", marginTop: "2px" }}>{subtitle}</div>
+        )}
       </div>
     </div>
   );
@@ -241,6 +267,11 @@ export default function DemandDashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
+  // Phase 14 Forecast State
+  const [horizon, setHorizon] = useState<number>(3);
+  const [forecastData, setForecastData] = useState<GlobalForecastOverviewResponse | null>(null);
+  const [forecastLoading, setForecastLoading] = useState(false);
+
   // Filters
   const [search, setSearch] = useState("");
   const [shortageFilter, setShortageFilter] = useState<SkillShortageStatus | "">("");
@@ -252,12 +283,14 @@ export default function DemandDashboardPage() {
     else setLoading(true);
     setError(null);
     try {
-      const [ov, sk] = await Promise.all([
+      const [ov, sk, fc] = await Promise.all([
         getDemandOverview(),
         listSkillDemand({ limit: 200 }),
+        getDemandForecastOverview({ horizon: 3, limit: 10 }),
       ]);
       setOverview(ov);
       setSkills(sk);
+      setForecastData(fc);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Failed to load demand data";
       setError(msg);
@@ -266,6 +299,19 @@ export default function DemandDashboardPage() {
       setRefreshing(false);
     }
   }, []);
+
+  const handleHorizonChange = async (newHorizon: number) => {
+    setHorizon(newHorizon);
+    setForecastLoading(true);
+    try {
+      const fc = await getDemandForecastOverview({ horizon: newHorizon, limit: 10 });
+      setForecastData(fc);
+    } catch (err) {
+      console.error("Failed to update forecast horizon:", err);
+    } finally {
+      setForecastLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchData();
@@ -419,10 +465,10 @@ export default function DemandDashboardPage() {
                     margin: 0,
                   }}
                 >
-                  Skill Demand Digital Twin
+                  Skill Demand Digital Twin &amp; Forecasting
                 </h1>
                 <p style={{ color: "#64748b", fontSize: "13px", margin: 0 }}>
-                  Phase 13 — Platform-computed demand and supply intelligence
+                  Phases 13 &amp; 14 — Observed platform demand &amp; deterministic statistical forecasting
                 </p>
               </div>
             </div>
@@ -440,7 +486,7 @@ export default function DemandDashboardPage() {
               }}
             >
               <Zap className="w-3 h-3" />
-              Data sourced from platform jobs, candidates &amp; courses only — not an external labor market dataset
+              Actual demand sourced strictly from platform data. Forecast demand generated by local statistical models.
             </div>
           </div>
           <button
@@ -465,7 +511,7 @@ export default function DemandDashboardPage() {
           </button>
         </div>
 
-        {/* ── KPI Cards ── */}
+        {/* ── KPI Cards (Actual Observed Platform Data) ── */}
         {kpis && (
           <div
             style={{
@@ -475,15 +521,259 @@ export default function DemandDashboardPage() {
               marginBottom: "32px",
             }}
           >
-            <KpiCard icon={Briefcase} label="Active Published Jobs" value={kpis.total_active_jobs} accent="#8b5cf6" />
-            <KpiCard icon={Zap} label="Skills In Demand" value={kpis.unique_skills_in_demand} accent="#6366f1" />
-            <KpiCard icon={Users} label="Verified Candidates" value={kpis.verified_candidate_supply} accent="#22c55e" />
-            <KpiCard icon={BookOpen} label="Training Courses" value={kpis.published_training_courses} accent="#3b82f6" />
-            <KpiCard icon={AlertTriangle} label="Skills in Shortage" value={kpis.skills_in_shortage} accent="#f97316" />
+            <KpiCard icon={Briefcase} label="Active Published Jobs" value={kpis.total_active_jobs} accent="#8b5cf6" subtitle="Actual Demand" />
+            <KpiCard icon={Zap} label="Skills In Demand" value={kpis.unique_skills_in_demand} accent="#6366f1" subtitle="Observed Skills" />
+            <KpiCard icon={Users} label="Verified Candidates" value={kpis.verified_candidate_supply} accent="#22c55e" subtitle="Verified Supply" />
+            <KpiCard icon={BookOpen} label="Training Courses" value={kpis.published_training_courses} accent="#3b82f6" subtitle="Active Catalog" />
+            <KpiCard icon={AlertTriangle} label="Skills in Shortage" value={kpis.skills_in_shortage} accent="#f97316" subtitle="Current Shortage" />
           </div>
         )}
 
-        {/* ── Top & Shortage Leaderboard ── */}
+        {/* ── Phase 14: Skill Demand Forecast Section ── */}
+        <div
+          style={{
+            background: "linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(99,102,241,0.04) 100%)",
+            border: "1px solid rgba(139,92,246,0.25)",
+            borderRadius: "20px",
+            padding: "24px",
+            marginBottom: "32px",
+          }}
+        >
+          {/* Section Header with Horizon Switcher */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: "16px",
+              marginBottom: "20px",
+            }}
+          >
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <Sparkles className="w-5 h-5" style={{ color: "#a855f7" }} />
+                <h2 style={{ fontSize: "18px", fontWeight: "700", color: "#f1f5f9", margin: 0 }}>
+                  Skill Demand Forecast
+                </h2>
+                <span
+                  style={{
+                    fontSize: "10px",
+                    fontWeight: "700",
+                    background: "rgba(168,85,247,0.2)",
+                    border: "1px solid rgba(168,85,247,0.4)",
+                    color: "#c084fc",
+                    padding: "2px 8px",
+                    borderRadius: "99px",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em",
+                  }}
+                >
+                  Phase 14
+                </span>
+              </div>
+              <p style={{ color: "#94a3b8", fontSize: "13px", margin: "4px 0 0" }}>
+                Deterministic statistical projections across {horizon}-month horizon. Predictions are non-negative bounded.
+              </p>
+            </div>
+
+            {/* Horizon Selector */}
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", background: "rgba(0,0,0,0.2)", padding: "4px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.08)" }}>
+              <span style={{ fontSize: "12px", color: "#64748b", padding: "0 8px" }}>Horizon:</span>
+              {[1, 3, 6, 12].map((h) => (
+                <button
+                  key={h}
+                  onClick={() => handleHorizonChange(h)}
+                  disabled={forecastLoading}
+                  style={{
+                    padding: "5px 12px",
+                    borderRadius: "6px",
+                    border: "none",
+                    background: horizon === h ? "linear-gradient(135deg, #8b5cf6, #6366f1)" : "transparent",
+                    color: horizon === h ? "#ffffff" : "#94a3b8",
+                    fontSize: "12px",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  {h}M
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Forecast Overview KPIs */}
+          {forecastData && (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+                gap: "12px",
+                marginBottom: "20px",
+              }}
+            >
+              <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "12px", padding: "14px" }}>
+                <div style={{ fontSize: "11px", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em" }}>Forecast Horizon</div>
+                <div style={{ fontSize: "20px", fontWeight: "700", color: "#c4b5fd", marginTop: "4px" }}>{forecastData.horizon_months} Months</div>
+              </div>
+              <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "12px", padding: "14px" }}>
+                <div style={{ fontSize: "11px", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em" }}>Total Projected Demand</div>
+                <div style={{ fontSize: "20px", fontWeight: "700", color: "#f1f5f9", marginTop: "4px" }}>{forecastData.total_forecasted_demand}</div>
+              </div>
+              <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "12px", padding: "14px" }}>
+                <div style={{ fontSize: "11px", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em" }}>Top Growing Skill</div>
+                <div style={{ fontSize: "16px", fontWeight: "700", color: "#22c55e", marginTop: "4px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {forecastData.top_growing_skills[0]?.skill_name || "N/A"}
+                </div>
+              </div>
+              <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "12px", padding: "14px" }}>
+                <div style={{ fontSize: "11px", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em" }}>Forecasted Shortage Skills</div>
+                <div style={{ fontSize: "20px", fontWeight: "700", color: "#f97316", marginTop: "4px" }}>{forecastData.high_forecast_shortage_skills.length}</div>
+              </div>
+            </div>
+          )}
+
+          {/* Forecast Table */}
+          <div
+            style={{
+              background: "rgba(0,0,0,0.2)",
+              border: "1px solid rgba(255,255,255,0.06)",
+              borderRadius: "14px",
+              overflow: "hidden",
+            }}
+          >
+            {/* Header row */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 110px 110px 110px 130px 130px 110px",
+                gap: "12px",
+                padding: "10px 16px",
+                background: "rgba(255,255,255,0.02)",
+                borderBottom: "1px solid rgba(255,255,255,0.06)",
+                fontSize: "11px",
+                fontWeight: "600",
+                color: "#64748b",
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+              }}
+            >
+              <div>Skill</div>
+              <div style={{ textAlign: "center" }}>Actual Demand</div>
+              <div style={{ textAlign: "center" }}>Forecast ({horizon}M)</div>
+              <div style={{ textAlign: "center" }}>Expected Growth</div>
+              <div style={{ textAlign: "center" }}>Confidence (95%)</div>
+              <div style={{ textAlign: "center" }}>Forecast Shortage</div>
+              <div style={{ textAlign: "center" }}>Model</div>
+            </div>
+
+            {/* Content */}
+            {forecastData && forecastData.forecast_items && forecastData.forecast_items.length > 0 ? (
+              forecastData.forecast_items.map((fc) => (
+                <Link key={fc.skill_id} href={`/demand/skills/${fc.skill_id}`} style={{ textDecoration: "none" }}>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 110px 110px 110px 130px 130px 110px",
+                      gap: "12px",
+                      padding: "12px 16px",
+                      borderBottom: "1px solid rgba(255,255,255,0.03)",
+                      alignItems: "center",
+                      transition: "background 0.15s",
+                      cursor: "pointer",
+                    }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.background = "rgba(255,255,255,0.04)"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = "transparent"; }}
+                  >
+                    {/* Skill name */}
+                    <div>
+                      <span style={{ fontSize: "13px", fontWeight: "600", color: "#f1f5f9" }}>{fc.skill_name}</span>
+                      {fc.category && (
+                        <div style={{ fontSize: "11px", color: "#64748b" }}>{fc.category}</div>
+                      )}
+                    </div>
+
+                    {/* Actual demand */}
+                    <div style={{ textAlign: "center", fontSize: "13px", color: "#94a3b8", fontWeight: "500" }}>
+                      {fc.current_demand}
+                    </div>
+
+                    {/* Forecast Demand */}
+                    <div style={{ textAlign: "center", fontSize: "14px", color: "#a855f7", fontWeight: "700" }}>
+                      {fc.forecasted_demand}
+                    </div>
+
+                    {/* Growth % & badge */}
+                    <div style={{ textAlign: "center" }}>
+                      <span
+                        style={{
+                          display: "inline-block",
+                          fontSize: "11px",
+                          fontWeight: "700",
+                          padding: "2px 6px",
+                          borderRadius: "4px",
+                          background: `${growthColor(fc.growth_trend)}15`,
+                          color: growthColor(fc.growth_trend),
+                        }}
+                      >
+                        {fc.growth_percentage > 0 ? `+${fc.growth_percentage.toFixed(0)}%` : `${fc.growth_percentage.toFixed(0)}%`}
+                      </span>
+                    </div>
+
+                    {/* Confidence Range */}
+                    <div style={{ textAlign: "center", fontSize: "11px", color: "#94a3b8" }}>
+                      {fc.lower_bound} – {fc.upper_bound}
+                    </div>
+
+                    {/* Forecast Shortage */}
+                    <div style={{ textAlign: "center" }}>
+                      <span
+                        style={{
+                          fontSize: "10px",
+                          fontWeight: "700",
+                          padding: "2px 6px",
+                          borderRadius: "4px",
+                          background: `${shortageColor(fc.forecasted_shortage_status)}15`,
+                          color: shortageColor(fc.forecasted_shortage_status),
+                        }}
+                      >
+                        {shortageLabel(fc.forecasted_shortage_status)}
+                      </span>
+                    </div>
+
+                    {/* Model */}
+                    <div style={{ textAlign: "center" }}>
+                      <span
+                        style={{
+                          fontSize: "10px",
+                          padding: "2px 6px",
+                          borderRadius: "4px",
+                          background: "rgba(255,255,255,0.06)",
+                          color: "#cbd5e1",
+                        }}
+                      >
+                        {formatModelName(fc.model_used)}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))
+            ) : (
+              <div style={{ padding: "24px", textAlign: "center", color: "#64748b", fontSize: "13px" }}>
+                No forecast projections available yet.
+              </div>
+            )}
+          </div>
+
+          {/* Forecast Disclaimer */}
+          <div style={{ marginTop: "12px", fontSize: "11px", color: "#64748b", display: "flex", alignItems: "center", gap: "6px" }}>
+            <Calendar className="w-3.5 h-3.5" />
+            Forecasts are estimates and are not guarantees of future job demand. Actual platform job postings remain the source of truth.
+          </div>
+        </div>
+
+        {/* ── Top & Shortage Leaderboard (Observed Phase 13 Data) ── */}
         {overview && (
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "32px" }}>
             {/* Top Demanded */}
@@ -497,7 +787,7 @@ export default function DemandDashboardPage() {
             >
               <h3 style={{ color: "#e2e8f0", fontSize: "15px", fontWeight: "700", margin: "0 0 16px", display: "flex", alignItems: "center", gap: "8px" }}>
                 <BarChart3 className="w-4 h-4" style={{ color: "#8b5cf6" }} />
-                Most Demanded Skills
+                Most Demanded Skills (Observed)
               </h3>
               <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                 {overview.top_demanded_skills.map((s, i) => (
@@ -546,7 +836,7 @@ export default function DemandDashboardPage() {
             >
               <h3 style={{ color: "#e2e8f0", fontSize: "15px", fontWeight: "700", margin: "0 0 16px", display: "flex", alignItems: "center", gap: "8px" }}>
                 <AlertTriangle className="w-4 h-4" style={{ color: "#ef4444" }} />
-                Critical Skill Shortages
+                Critical Skill Shortages (Observed)
               </h3>
               <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                 {overview.highest_shortage_skills.map((s) => (
@@ -596,7 +886,7 @@ export default function DemandDashboardPage() {
           </div>
         )}
 
-        {/* ── Skills Table ── */}
+        {/* ── All Skills Table (Observed Platform Data) ── */}
         <div
           style={{
             background: "rgba(255,255,255,0.03)",

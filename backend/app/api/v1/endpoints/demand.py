@@ -18,16 +18,18 @@ from app.core.deps import require_roles
 from app.models.user import User, UserRole
 from app.schemas.demand import (
     DemandOverviewResponse,
+    GlobalForecastOverviewResponse,
     SkillDemandDetailResponse,
     SkillDemandIndustryItem,
     SkillDemandLocationItem,
     SkillDemandSummaryItem,
     SkillDemandTrainingItem,
     SkillDemandTrendItem,
+    SkillForecastResponse,
     SkillShortageStatus,
     SkillSupplyBreakdown,
 )
-from app.services import skill_demand_service
+from app.services import demand_forecast_service, skill_demand_service
 
 router = APIRouter()
 
@@ -199,3 +201,44 @@ async def get_skill_demand_training(
 ) -> list[SkillDemandTrainingItem]:
     """List published active courses addressing this skill's training gap."""
     return await skill_demand_service.get_skill_demand_training(db, skill_id=skill_id)
+
+
+# ---------------------------------------------------------------------------
+# Phase 14: Demand Forecasting Endpoints
+# ---------------------------------------------------------------------------
+
+
+@router.get(
+    "/forecast",
+    response_model=GlobalForecastOverviewResponse,
+    summary="Multi-skill demand forecast leaderboard",
+    description="Multi-skill statistical demand projections across 1–12 month horizons.",
+)
+async def get_global_demand_forecast(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(_ANY_AUTHENTICATED),
+    horizon: int = Query(default=3, ge=1, le=12, description="Forecast horizon in months (1–12)"),
+    industry: str | None = Query(default=None, description="Filter by employer industry"),
+    location: str | None = Query(default=None, description="Filter by job location city/state"),
+    limit: int = Query(default=50, ge=1, le=200, description="Max skills to return"),
+) -> GlobalForecastOverviewResponse:
+    """Returns platform-wide skill demand forecasts with top growing/declining leaders."""
+    return await demand_forecast_service.get_global_demand_forecast(
+        db, horizon=horizon, industry=industry, location=location, limit=limit
+    )
+
+
+@router.get(
+    "/skills/{skill_id}/forecast",
+    response_model=SkillForecastResponse,
+    summary="Skill 360 demand forecast and projections",
+    description="Detailed statistical forecast, confidence intervals, growth trends for a skill.",
+)
+async def get_skill_demand_forecast(
+    skill_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(_ANY_AUTHENTICATED),
+    horizon: int = Query(default=3, ge=1, le=12, description="Forecast horizon in months (1–12)"),
+) -> SkillForecastResponse:
+    """Compute detailed forward-looking demand projections for a specific skill."""
+    return await demand_forecast_service.get_skill_forecast(db, skill_id=skill_id, horizon=horizon)
