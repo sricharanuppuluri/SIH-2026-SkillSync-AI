@@ -86,6 +86,12 @@ export const navItems: NavItem[] = [
     status: "available",
   },
   {
+    title: "Placements & Retention",
+    href: "/employer/outcomes",
+    icon: Briefcase,
+    status: "available",
+  },
+  {
     title: "Review Applicants",
     href: "/employer/applications",
     icon: Users,
@@ -134,6 +140,12 @@ export const navItems: NavItem[] = [
     status: "available",
   },
   {
+    title: "Graduate Outcomes",
+    href: "/training-provider/outcomes",
+    icon: Award,
+    status: "available",
+  },
+  {
     title: "Provider Profile",
     href: "/training-provider/profile",
     icon: Building2,
@@ -161,8 +173,7 @@ export const navItems: NavItem[] = [
     title: "Outcome Analytics",
     href: "/analytics",
     icon: BarChart3,
-    status: "coming-soon",
-    phase: "Phase 14",
+    status: "available",
   },
   {
     title: "Settings",
@@ -194,6 +205,7 @@ export const ROLE_NAV_PERMISSIONS: Record<UserRole, string[]> = {
     "/dashboard",
     "/employer/jobs",
     "/employer/contracts",
+    "/employer/outcomes",
     "/employer/applications",
     "/employer/profile",
     "/tools/skill-extractor",
@@ -206,6 +218,7 @@ export const ROLE_NAV_PERMISSIONS: Record<UserRole, string[]> = {
   TRAINING_PROVIDER: [
     "/dashboard",
     "/training-provider/courses",
+    "/training-provider/outcomes",
     "/training-provider/profile",
     "/tools/skill-extractor",
     "/tools/semantic-skill-match",
@@ -234,9 +247,11 @@ export const ROLE_NAV_PERMISSIONS: Record<UserRole, string[]> = {
     "/candidate/learning",
     "/employer/jobs",
     "/employer/contracts",
+    "/employer/outcomes",
     "/employer/applications",
     "/employer/profile",
     "/training-provider/courses",
+    "/training-provider/outcomes",
     "/training-provider/profile",
     "/jobs",
     "/admin/skills",

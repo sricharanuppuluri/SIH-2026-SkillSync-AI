@@ -13,6 +13,7 @@ from app.api.v1.endpoints import (
     employer,
     health,
     jobs,
+    outcomes,
     passport,
     profiles,
     rbac_test,
@@ -66,3 +67,6 @@ api_router.include_router(
 
 # Phase 16: Employer Skill Contract Exchange Endpoints
 api_router.include_router(contracts.router, prefix="/contracts", tags=["Employer Skill Contracts"])
+
+# Phase 17: Employment Outcome Intelligence & Provider Performance Index Endpoints
+api_router.include_router(outcomes.router, prefix="/outcomes", tags=["Outcome Intelligence"])
