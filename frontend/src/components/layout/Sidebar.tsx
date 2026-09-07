@@ -19,6 +19,7 @@ import {
   Sparkles,
   Bot,
   BookOpen,
+  Sliders,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -144,6 +145,12 @@ export const navItems: NavItem[] = [
     status: "available",
   },
   {
+    title: "What-If Simulator",
+    href: "/simulator",
+    icon: Sliders,
+    status: "available",
+  },
+  {
     title: "Outcome Analytics",
     href: "/analytics",
     icon: BarChart3,
@@ -173,6 +180,7 @@ export const ROLE_NAV_PERMISSIONS: Record<UserRole, string[]> = {
     "/tools/semantic-skill-match",
     "/jobs",
     "/demand",
+    "/simulator",
     "/settings",
   ],
   EMPLOYER: [
@@ -184,6 +192,7 @@ export const ROLE_NAV_PERMISSIONS: Record<UserRole, string[]> = {
     "/tools/semantic-skill-match",
     "/jobs",
     "/demand",
+    "/simulator",
     "/settings",
   ],
   TRAINING_PROVIDER: [
@@ -193,6 +202,7 @@ export const ROLE_NAV_PERMISSIONS: Record<UserRole, string[]> = {
     "/tools/skill-extractor",
     "/tools/semantic-skill-match",
     "/demand",
+    "/simulator",
     "/settings",
   ],
   GOVERNMENT: [
@@ -200,6 +210,7 @@ export const ROLE_NAV_PERMISSIONS: Record<UserRole, string[]> = {
     "/tools/skill-extractor",
     "/tools/semantic-skill-match",
     "/demand",
+    "/simulator",
     "/analytics",
     "/settings",
   ],
@@ -224,6 +235,7 @@ export const ROLE_NAV_PERMISSIONS: Record<UserRole, string[]> = {
     "/tools/semantic-skill-match",
     "/passport",
     "/demand",
+    "/simulator",
     "/analytics",
     "/settings",
   ],
