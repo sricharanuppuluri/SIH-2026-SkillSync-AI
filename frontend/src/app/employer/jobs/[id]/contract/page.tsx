@@ -22,7 +22,7 @@ import { ContractQualityScore } from "@/types";
 export default function JobContractPage() {
   const params = useParams();
   const router = useRouter();
-  const jobId = params.jobId as string;
+  const jobId = (params.id || params.jobId) as string;
 
   const [job, setJob] = React.useState<Job | null>(null);
   const [activeContract, setActiveContract] = React.useState<SkillContractResponse | null>(null);
