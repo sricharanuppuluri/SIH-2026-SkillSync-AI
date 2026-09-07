@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from app.models.application import Application
     from app.models.profiles import EmployerProfile
     from app.models.skill import Skill
+    from app.models.skill_contract import SkillContract
 
 
 class EmploymentType(enum.StrEnum):
@@ -86,6 +87,9 @@ class Job(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     )
     applications: Mapped[list["Application"]] = relationship(
         "Application", back_populates="job", cascade="all, delete-orphan"
+    )
+    contracts: Mapped[list["SkillContract"]] = relationship(
+        "SkillContract", back_populates="job", cascade="all, delete-orphan"
     )
 
     def __repr__(self) -> str:

@@ -6,6 +6,7 @@ from app.api.v1.endpoints import (
     auth,
     candidate,
     candidate_learning,
+    contracts,
     copilot,
     courses,
     demand,
@@ -62,3 +63,6 @@ api_router.include_router(demand.router, prefix="/demand", tags=["Skill Demand D
 api_router.include_router(
     simulator.router, prefix="/simulator", tags=["What-If Skill Demand Simulator"]
 )
+
+# Phase 16: Employer Skill Contract Exchange Endpoints
+api_router.include_router(contracts.router, prefix="/contracts", tags=["Employer Skill Contracts"])

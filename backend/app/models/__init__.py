@@ -26,6 +26,14 @@ from app.models.skill import (
     SkillStatus,
     SkillType,
 )
+from app.models.skill_contract import (
+    ContractEvidenceType,
+    ContractRequirementImportance,
+    ContractRequirementType,
+    ContractStatus,
+    SkillContract,
+    SkillContractRequirement,
+)
 from app.models.skill_embedding import SkillEmbedding
 from app.models.skill_evidence import EvidenceStatus, EvidenceType, SkillEvidence
 from app.models.user import User, UserRole
@@ -39,6 +47,10 @@ __all__ = [
     "CandidateExperience",
     "CandidateProfile",
     "CandidateSkill",
+    "ContractEvidenceType",
+    "ContractRequirementImportance",
+    "ContractRequirementType",
+    "ContractStatus",
     "CopilotConversation",
     "CopilotMessage",
     "Course",
@@ -63,6 +75,8 @@ __all__ = [
     "ProficiencyLevel",
     "Skill",
     "SkillAlias",
+    "SkillContract",
+    "SkillContractRequirement",
     "SkillEmbedding",
     "SkillEvidence",
     "SkillPassportShare",
