@@ -60,7 +60,7 @@ describe("AppShell Layout Component", () => {
     expect(screen.getByText("Shell Children Loaded")).toBeDefined();
   });
 
-  it("renders coming-soon badges for future modules", async () => {
+  it("renders navigation items and layout landmarks", async () => {
     await act(async () => {
       render(
         <AppShell>
@@ -69,7 +69,7 @@ describe("AppShell Layout Component", () => {
       );
     });
 
-    const soonBadges = screen.getAllByText("Soon");
-    expect(soonBadges.length).toBeGreaterThan(0);
+    const dashboardLinks = screen.getAllByText("Dashboard");
+    expect(dashboardLinks.length).toBeGreaterThan(0);
   });
 });

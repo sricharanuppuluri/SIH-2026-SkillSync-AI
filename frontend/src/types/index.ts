@@ -5,6 +5,7 @@ export * from "./copilot";
 export * from "./demand";
 export * from "./employer";
 export * from "./extraction";
+export * from "./outcome";
 export * from "./passport";
 export * from "./semantic";
 export * from "./skill";

@@ -11,6 +11,13 @@ from app.models.curriculum import CurriculumLesson, CurriculumModule
 from app.models.enrollment import Enrollment, EnrollmentStatus
 from app.models.enrollment_progress import EnrollmentLessonProgress
 from app.models.job import EmploymentType, ExperienceLevel, Job, JobSkill, JobStatus
+from app.models.outcome import (
+    PlacementOutcome,
+    PlacementTrainingAttribution,
+    PPITier,
+    ProviderPerformanceSnapshot,
+    RetentionStatus,
+)
 from app.models.passport_share import SkillPassportShare
 from app.models.profiles import (
     CandidateProfile,
@@ -72,7 +79,12 @@ __all__ = [
     "Job",
     "JobSkill",
     "JobStatus",
+    "PPITier",
+    "PlacementOutcome",
+    "PlacementTrainingAttribution",
     "ProficiencyLevel",
+    "ProviderPerformanceSnapshot",
+    "RetentionStatus",
     "Skill",
     "SkillAlias",
     "SkillContract",
