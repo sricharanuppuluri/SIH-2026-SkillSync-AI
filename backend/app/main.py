@@ -1,13 +1,12 @@
 """Main FastAPI application entrypoint."""
 
+import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-
-import logging
 
 from app.api.v1.api import api_router
 from app.core.config import settings
@@ -68,6 +67,7 @@ async def global_exception_handler(request, exc: Exception) -> JSONResponse:
         status_code=500,
         content={"detail": "An internal server error occurred. Please contact system support."},
     )
+
 
 # Mount Versioned API Routes
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)

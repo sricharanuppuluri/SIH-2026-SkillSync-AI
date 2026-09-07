@@ -9,8 +9,8 @@ Usage:
 """
 
 import asyncio
-from datetime import date, datetime, timedelta, timezone
 import logging
+from datetime import UTC, date, datetime, timedelta
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -77,7 +77,7 @@ async def seed_demo_ecosystem(session: AsyncSession) -> dict[str, int]:
     pg_skill = skill_map.get("postgresql") or all_skills[4]
 
     default_pw_hash = get_password_hash("DevPassword123!")
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     # 2. Seed Admin User
     admin_user = (
@@ -97,9 +97,7 @@ async def seed_demo_ecosystem(session: AsyncSession) -> dict[str, int]:
 
     # 3. Seed Training Provider User & Curriculum
     tp_user = (
-        await session.execute(
-            select(User).where(User.email == "dev.provider@skillsync.internal")
-        )
+        await session.execute(select(User).where(User.email == "dev.provider@skillsync.internal"))
     ).scalar_one_or_none()
     if not tp_user:
         tp_user = User(
@@ -114,9 +112,7 @@ async def seed_demo_ecosystem(session: AsyncSession) -> dict[str, int]:
 
     tp_profile = (
         await session.execute(
-            select(TrainingProviderProfile).where(
-                TrainingProviderProfile.user_id == tp_user.id
-            )
+            select(TrainingProviderProfile).where(TrainingProviderProfile.user_id == tp_user.id)
         )
     ).scalar_one_or_none()
     if not tp_profile:
@@ -146,7 +142,10 @@ async def seed_demo_ecosystem(session: AsyncSession) -> dict[str, int]:
         course = Course(
             provider_id=tp_profile.id,
             title="Full Stack Python & AI Cloud Engineering Bootcamp",
-            description="Comprehensive 16-week vocational curriculum covering modern Python, FastAPI, PostgreSQL, and React.",
+            description=(
+                "Comprehensive 16-week vocational curriculum covering "
+                "modern Python, FastAPI, PostgreSQL, and React."
+            ),
             duration_hours=160,
             mode=CourseMode.HYBRID,
             status=CourseStatus.PUBLISHED,
@@ -165,9 +164,7 @@ async def seed_demo_ecosystem(session: AsyncSession) -> dict[str, int]:
 
     # 4. Seed Employer User, Profile, Job Requisition & Skill Contract
     emp_user = (
-        await session.execute(
-            select(User).where(User.email == "dev.employer@skillsync.internal")
-        )
+        await session.execute(select(User).where(User.email == "dev.employer@skillsync.internal"))
     ).scalar_one_or_none()
     if not emp_user:
         emp_user = User(
@@ -181,9 +178,7 @@ async def seed_demo_ecosystem(session: AsyncSession) -> dict[str, int]:
         await session.flush()
 
     emp_profile = (
-        await session.execute(
-            select(EmployerProfile).where(EmployerProfile.user_id == emp_user.id)
-        )
+        await session.execute(select(EmployerProfile).where(EmployerProfile.user_id == emp_user.id))
     ).scalar_one_or_none()
     if not emp_profile:
         emp_profile = EmployerProfile(
@@ -212,7 +207,10 @@ async def seed_demo_ecosystem(session: AsyncSession) -> dict[str, int]:
         job = Job(
             employer_id=emp_profile.id,
             title="Junior Backend & Cloud Engineer (Python/FastAPI)",
-            description="Seeking a motivated engineer to build scalable microservices using Python, FastAPI, and PostgreSQL.",
+            description=(
+                "Seeking a motivated engineer to build scalable microservices "
+                "using Python, FastAPI, and PostgreSQL."
+            ),
             location_city="Bengaluru",
             location_state="Karnataka",
             is_remote=True,
@@ -269,7 +267,10 @@ async def seed_demo_ecosystem(session: AsyncSession) -> dict[str, int]:
             version=1,
             status=ContractStatus.ACTIVE,
             title="Enterprise Python & Cloud Talent Pipeline 2026",
-            description="Guaranteed interview and placement pipeline for certified Python & Cloud full-stack engineers.",
+            description=(
+                "Guaranteed interview and placement pipeline for certified "
+                "Python & Cloud full-stack engineers."
+            ),
             effective_at=now - timedelta(days=60),
         )
         session.add(contract)
@@ -301,9 +302,7 @@ async def seed_demo_ecosystem(session: AsyncSession) -> dict[str, int]:
 
     # 5. Seed Candidate User, Profile, Education, Experience & Skills
     cand_user = (
-        await session.execute(
-            select(User).where(User.email == "dev.candidate@skillsync.internal")
-        )
+        await session.execute(select(User).where(User.email == "dev.candidate@skillsync.internal"))
     ).scalar_one_or_none()
     if not cand_user:
         cand_user = User(
@@ -325,7 +324,10 @@ async def seed_demo_ecosystem(session: AsyncSession) -> dict[str, int]:
         cand_profile = CandidateProfile(
             user_id=cand_user.id,
             headline="Full Stack Python & AI Cloud Engineer",
-            bio="Certified full-stack software engineer with hands-on experience in FastAPI microservices and React.",
+            bio=(
+                "Certified full-stack software engineer with hands-on experience in "
+                "FastAPI microservices and React."
+            ),
             experience_years=2.0,
             education_level="B.Tech Computer Science & Engineering",
             location_city="Bengaluru",
@@ -354,7 +356,9 @@ async def seed_demo_ecosystem(session: AsyncSession) -> dict[str, int]:
                 job_title="Software Engineering Intern",
                 start_date=date(2024, 1, 15),
                 end_date=date(2024, 6, 30),
-                description="Built RESTful APIs in FastAPI and integrated PostgreSQL backend models.",
+                description=(
+                    "Built RESTful APIs in FastAPI and integrated PostgreSQL backend models."
+                ),
                 location_city="Bengaluru",
             )
         )
@@ -423,7 +427,9 @@ async def seed_demo_ecosystem(session: AsyncSession) -> dict[str, int]:
                 verified_at=now - timedelta(days=90),
                 verification_method=VerificationMethod.COURSE_COMPLETION,
                 verification_score=98.0,
-                verification_summary="Completed Full Stack Python & AI Cloud Engineering Bootcamp with distinction.",
+                verification_summary=(
+                    "Completed Full Stack Python & AI Cloud Engineering Bootcamp with distinction."
+                ),
             )
         )
         session.add(
@@ -433,7 +439,9 @@ async def seed_demo_ecosystem(session: AsyncSession) -> dict[str, int]:
                 verified_at=now - timedelta(days=90),
                 verification_method=VerificationMethod.COURSE_COMPLETION,
                 verification_score=95.0,
-                verification_summary="Demonstrated advanced FastAPI microservices proficiency during bootcamp.",
+                verification_summary=(
+                    "Demonstrated advanced FastAPI microservices proficiency during bootcamp."
+                ),
             )
         )
         await session.flush()
@@ -453,7 +461,10 @@ async def seed_demo_ecosystem(session: AsyncSession) -> dict[str, int]:
             job_id=job.id,
             status=ApplicationStatus.HIRED,
             applied_at=now - timedelta(days=75),
-            cover_note="I am excited to apply for the Junior Backend Engineer role with verified skills in Python and FastAPI.",
+            cover_note=(
+                "I am excited to apply for the Junior Backend Engineer role "
+                "with verified skills in Python and FastAPI."
+            ),
         )
         session.add(app_record)
         await session.flush()
@@ -461,9 +472,7 @@ async def seed_demo_ecosystem(session: AsyncSession) -> dict[str, int]:
     # Seed Placement Outcome & Training Attribution (Phase 17)
     placement = (
         await session.execute(
-            select(PlacementOutcome).where(
-                PlacementOutcome.application_id == app_record.id
-            )
+            select(PlacementOutcome).where(PlacementOutcome.application_id == app_record.id)
         )
     ).scalar_one_or_none()
     if not placement:
@@ -480,7 +489,9 @@ async def seed_demo_ecosystem(session: AsyncSession) -> dict[str, int]:
             retention_status=RetentionStatus.RETAINED_90D,
             contract_fulfillment_score=94.5,
             employer_satisfaction_rating=5,
-            employer_feedback_notes="Outstanding technical competency and immediate production impact. Fast onboarding.",
+            employer_feedback_notes=(
+                "Outstanding technical competency and immediate production impact. Fast onboarding."
+            ),
             verified_by_employer=True,
         )
         session.add(placement)
@@ -529,9 +540,7 @@ async def seed_demo_ecosystem(session: AsyncSession) -> dict[str, int]:
 
     # 6. Seed Government Observer User & Profile
     gov_user = (
-        await session.execute(
-            select(User).where(User.email == "dev.gov@skillsync.internal")
-        )
+        await session.execute(select(User).where(User.email == "dev.gov@skillsync.internal"))
     ).scalar_one_or_none()
     if not gov_user:
         gov_user = User(

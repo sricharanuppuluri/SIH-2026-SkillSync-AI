@@ -8,8 +8,9 @@ Validates:
 - Health endpoint sanitization
 """
 
-from httpx import AsyncClient
 from unittest.mock import patch
+
+from httpx import AsyncClient
 
 from app.core.config import settings
 
@@ -60,8 +61,11 @@ class TestGlobalExceptionHandler:
 
             original_get_health = health.get_health
             try:
+
                 async def broken_health(*args, **kwargs):  # type: ignore
-                    raise RuntimeError("Internal DB connection string: postgres://user:pass@host/db")
+                    raise RuntimeError(
+                        "Internal DB connection string: postgres://user:pass@host/db"
+                    )
 
                 health.get_health = broken_health
                 response = await async_client.get(f"{settings.API_V1_PREFIX}/health")
@@ -85,13 +89,15 @@ class TestRateLimiterBypass:
     """Rate limiter must be bypassed in testing mode to not slow or fail tests."""
 
     def test_rate_limiter_settings_bypass_in_testing(self) -> None:
-        """Rate limiting must be bypassed when APP_ENV is 'testing' or RATE_LIMITING_ENABLED is False.
+        """Rate limiting must be bypassed when APP_ENV is 'testing'
+        or RATE_LIMITING_ENABLED is False.
 
         The RateLimiter.__call__ has explicit bypass logic for these conditions.
         This test verifies the bypass attributes exist on settings.
         """
-        from app.core.rate_limiter import RateLimiter
         import inspect
+
+        from app.core.rate_limiter import RateLimiter
 
         # Verify the bypass attributes are accessible
         assert hasattr(settings, "APP_ENV")
@@ -145,7 +151,7 @@ class TestRateLimiterModule:
         assert rl.burst_limit == 30
 
     def test_rate_limiter_factory_helper(self) -> None:
-        from app.core.rate_limiter import rate_limit, RateLimiter
+        from app.core.rate_limiter import RateLimiter, rate_limit
 
         limiter = rate_limit(requests_per_minute=10)
         assert isinstance(limiter, RateLimiter)
@@ -156,8 +162,9 @@ class TestSecurityHeadersMiddlewareModule:
     """Unit test the SecurityHeadersMiddleware class directly."""
 
     def test_middleware_class_exists(self) -> None:
-        from app.core.security_headers import SecurityHeadersMiddleware
         from starlette.middleware.base import BaseHTTPMiddleware
+
+        from app.core.security_headers import SecurityHeadersMiddleware
 
         assert issubclass(SecurityHeadersMiddleware, BaseHTTPMiddleware)
 

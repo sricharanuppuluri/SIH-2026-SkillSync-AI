@@ -3,7 +3,7 @@
 import logging
 import time
 from collections import defaultdict
-from typing import Callable
+from collections.abc import Callable
 
 from fastapi import HTTPException, Request, status
 
@@ -33,9 +33,8 @@ class RateLimiter:
             return
 
         # Determine client identifier (IP or Authenticated User ID)
-        client_ip = (
-            request.headers.get("X-Forwarded-For", "").split(",")[0].strip()
-            or (request.client.host if request.client else "unknown_client")
+        client_ip = request.headers.get("X-Forwarded-For", "").split(",")[0].strip() or (
+            request.client.host if request.client else "unknown_client"
         )
         endpoint = request.url.path
         rate_key = f"rate_limit:{client_ip}:{endpoint}"
@@ -55,14 +54,19 @@ class RateLimiter:
             if count > self.requests_per_minute:
                 raise HTTPException(
                     status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                    detail=f"Rate limit exceeded: Maximum {self.requests_per_minute} requests per minute allowed.",
+                    detail=(
+                        f"Rate limit exceeded: Maximum {self.requests_per_minute} "
+                        "requests per minute allowed."
+                    ),
                     headers={"Retry-After": str(self.window_seconds)},
                 )
             return
         except HTTPException:
             raise
         except Exception as err:
-            logger.debug("Redis rate limiting unavailable (%s), falling back to in-memory: %s", rate_key, err)
+            logger.debug(
+                "Redis rate limiting unavailable (%s), falling back to in-memory: %s", rate_key, err
+            )
 
         # In-Memory Fallback
         cutoff = now - self.window_seconds
@@ -71,7 +75,10 @@ class RateLimiter:
             _in_memory_rate_cache[rate_key] = timestamps
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail=f"Rate limit exceeded: Maximum {self.requests_per_minute} requests per minute allowed.",
+                detail=(
+                    f"Rate limit exceeded: Maximum {self.requests_per_minute} "
+                    "requests per minute allowed."
+                ),
                 headers={"Retry-After": str(self.window_seconds)},
             )
 
