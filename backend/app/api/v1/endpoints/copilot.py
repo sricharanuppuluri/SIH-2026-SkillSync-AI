@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.deps import require_roles
+from app.core.rate_limiter import rate_limit
 from app.models.user import User, UserRole
 from app.schemas.career_copilot import (
     CareerCopilotChatResult,
@@ -23,6 +24,7 @@ router = APIRouter()
     "/chat",
     response_model=CareerCopilotChatResult,
     summary="Submit a prompt to AI Career Copilot",
+    dependencies=[Depends(rate_limit(requests_per_minute=20))],
 )
 async def chat(
     request: CareerCopilotRequest,

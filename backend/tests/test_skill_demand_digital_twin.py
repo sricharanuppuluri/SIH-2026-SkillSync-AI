@@ -62,7 +62,7 @@ async def _make_user(role: UserRole, **kwargs) -> tuple[User, str]:
     """Create any user role and return (user, token)."""
     async with AsyncSessionLocal() as session:
         user = User(
-            email=f"{role.value.lower()}_{uuid.uuid4().hex[:6]}@test.com",
+            email=f"{role.value.lower()}_{uuid.uuid4().hex[:12]}@test.com",
             password_hash=get_password_hash("Pass1234!"),
             full_name=kwargs.pop("full_name", f"Test {role.value}"),
             role=role,
@@ -144,7 +144,7 @@ async def _make_employer_with_profile(
     """Create employer user + profile."""
     async with AsyncSessionLocal() as session:
         user = User(
-            email=f"employer_{uuid.uuid4().hex[:6]}@corp.com",
+            email=f"employer_{uuid.uuid4().hex[:12]}@corp.com",
             password_hash=get_password_hash("Pass1234!"),
             full_name="Corp Employer",
             role=UserRole.EMPLOYER,
@@ -203,7 +203,7 @@ async def _make_training_provider_with_profile() -> tuple[User, TrainingProvider
     """Create training provider user + profile."""
     async with AsyncSessionLocal() as session:
         user = User(
-            email=f"tp_{uuid.uuid4().hex[:6]}@edu.com",
+            email=f"tp_{uuid.uuid4().hex[:12]}@edu.com",
             password_hash=get_password_hash("Pass1234!"),
             full_name="Training Provider",
             role=UserRole.TRAINING_PROVIDER,
