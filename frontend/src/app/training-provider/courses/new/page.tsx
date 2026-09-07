@@ -66,7 +66,7 @@ export default function CreateCoursePage() {
         duration_hours: Number(durationHours) || 1,
         capacity: Number(capacity),
         location_state: locationState.trim() || undefined,
-        skill_ids: selectedSkills.map((s) => s.id),
+        skill_ids: selectedSkills.map((s) => s.skill_id || s.id),
       });
 
       // 2. Create the Curriculum Modules & Lessons if any were added

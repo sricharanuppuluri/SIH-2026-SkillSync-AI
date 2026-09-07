@@ -69,6 +69,8 @@ class EnrollmentResponse(BaseModel):
 
     id: uuid.UUID
     candidate_id: uuid.UUID
+    candidate_name: str | None = None
+    candidate_email: str | None = None
     course_id: uuid.UUID
     course_title: str | None = None
     provider_name: str | None = None

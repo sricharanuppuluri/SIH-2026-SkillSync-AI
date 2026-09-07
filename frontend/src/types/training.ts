@@ -9,6 +9,10 @@ export interface SkillBrief {
   category?: string | null;
   skill_type?: string | null;
   is_primary?: boolean;
+  skill_id?: string;
+  skill_name?: string;
+  skill_code?: string;
+  code?: string;
 }
 
 export interface CurriculumLesson {
@@ -42,6 +46,7 @@ export interface Course {
   category?: string | null;
   difficulty: CourseDifficulty;
   delivery_mode: CourseMode;
+  mode?: CourseMode;
   duration_hours: number;
   duration_weeks?: number | null;
   capacity: number;

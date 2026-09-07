@@ -50,6 +50,7 @@ async def _serialize_course(course: Course) -> CourseResponse:
                     skill_id=cs.skill_id,
                     skill_name=skill_name,
                     skill_code=skill_code,
+                    name=skill_name,
                 )
             )
 
@@ -93,6 +94,7 @@ async def _serialize_course(course: Course) -> CourseResponse:
         duration_hours=course.duration_hours,
         difficulty=course.difficulty,
         mode=course.mode,
+        delivery_mode=course.mode,
         status=course.status,
         capacity=course.capacity,
         location_city=course.location_city,

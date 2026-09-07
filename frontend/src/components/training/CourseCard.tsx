@@ -57,7 +57,7 @@ export function CourseCard({
               {course.difficulty}
             </span>
             <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-800 text-slate-300 border border-slate-700">
-              {course.delivery_mode.replace("_", " ")}
+              {(course.delivery_mode || course.mode || "ONLINE").replace("_", " ")}
             </span>
             {course.category && (
               <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-indigo-950/40 text-indigo-400 border border-indigo-800/40">

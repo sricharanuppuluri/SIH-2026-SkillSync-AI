@@ -22,6 +22,7 @@ from app.schemas.curriculum import (
     CurriculumModuleResponse,
     CurriculumModuleUpdate,
 )
+from app.schemas.enrollment import EnrollmentResponse
 from app.schemas.profiles import (
     TrainingProviderProfileResponse,
     TrainingProviderProfileUpdate,
@@ -29,6 +30,7 @@ from app.schemas.profiles import (
 from app.schemas.training_provider import TrainingProviderDashboardResponse
 from app.services import (
     curriculum_service,
+    enrollment_service,
     training_course_service,
     training_provider_service,
 )
@@ -136,6 +138,23 @@ async def get_course(
     """Retrieve full course detail including canonical skills and curriculum modules."""
     profile = await training_provider_service.get_or_create_provider_profile(db, current_user)
     return await training_course_service.get_provider_course(
+        db, provider_id=profile.id, course_id=course_id
+    )
+
+
+@router.get(
+    "/courses/{course_id}/enrollments",
+    response_model=list[EnrollmentResponse],
+    summary="Get enrollments for a course owned by provider",
+)
+async def get_course_enrollments(
+    course_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_roles(UserRole.TRAINING_PROVIDER, UserRole.ADMIN)),
+) -> list[EnrollmentResponse]:
+    """Retrieve all candidate enrollments and progress for a course owned by the provider."""
+    profile = await training_provider_service.get_or_create_provider_profile(db, current_user)
+    return await enrollment_service.get_course_enrollments_for_provider(
         db, provider_id=profile.id, course_id=course_id
     )
 

@@ -12,6 +12,7 @@ from app.models.course import Course, CourseStatus
 from app.models.curriculum import CurriculumLesson, CurriculumModule
 from app.models.enrollment import Enrollment, EnrollmentStatus
 from app.models.enrollment_progress import EnrollmentLessonProgress
+from app.models.profiles import CandidateProfile
 from app.schemas.enrollment import (
     EnrollmentLessonProgressItem,
     EnrollmentProgressResponse,
@@ -368,3 +369,68 @@ async def complete_lesson(
     await db.commit()
 
     return await get_enrollment_progress(db, candidate_id, enrollment_id)
+
+
+async def get_course_enrollments_for_provider(
+    db: AsyncSession,
+    provider_id: uuid.UUID,
+    course_id: uuid.UUID,
+) -> list[EnrollmentResponse]:
+    """Retrieve all candidate enrollments for a course owned by the provider."""
+    course_stmt = select(Course).where(Course.id == course_id, Course.provider_id == provider_id)
+    course_res = await db.execute(course_stmt)
+    course = course_res.scalar_one_or_none()
+    if not course:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Course not found or access denied.",
+        )
+
+    stmt = (
+        select(Enrollment)
+        .where(Enrollment.course_id == course_id)
+        .options(
+            selectinload(Enrollment.candidate).selectinload(CandidateProfile.user),
+            selectinload(Enrollment.course),
+            selectinload(Enrollment.lesson_progress),
+        )
+        .order_by(Enrollment.enrolled_at.desc())
+    )
+    res = await db.execute(stmt)
+    enrollments = res.scalars().all()
+
+    result: list[EnrollmentResponse] = []
+    for e in enrollments:
+        progress_pct = 0.0
+        if e.lesson_progress:
+            total_lp = len(e.lesson_progress)
+            comp_lp = sum(1 for lp in e.lesson_progress if lp.is_completed)
+            progress_pct = round((comp_lp / total_lp) * 100, 1) if total_lp > 0 else 0.0
+        elif e.status == EnrollmentStatus.COMPLETED:
+            progress_pct = 100.0
+
+        cand_name = None
+        cand_email = None
+        if e.candidate and e.candidate.user:
+            cand_name = e.candidate.user.full_name
+            cand_email = e.candidate.user.email
+
+        result.append(
+            EnrollmentResponse(
+                id=e.id,
+                candidate_id=e.candidate_id,
+                candidate_name=cand_name,
+                candidate_email=cand_email,
+                course_id=e.course_id,
+                course_title=course.title,
+                provider_name=None,
+                status=e.status,
+                progress_percent=progress_pct,
+                enrolled_at=e.enrolled_at,
+                completed_at=e.completed_at,
+                created_at=e.created_at,
+                updated_at=e.updated_at,
+            )
+        )
+
+    return result

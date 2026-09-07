@@ -126,7 +126,7 @@ export default function CandidateCourseDetailPage() {
               {course?.difficulty}
             </span>
             <span className="px-2.5 py-0.5 rounded text-[10px] font-medium bg-slate-800 text-slate-300">
-              {course?.delivery_mode.replace("_", " ")}
+              {(course?.delivery_mode || course?.mode || "ONLINE").replace("_", " ")}
             </span>
             {course?.category && (
               <span className="px-2.5 py-0.5 rounded text-[10px] font-mono text-slate-400 bg-slate-950 border border-slate-800">

@@ -75,11 +75,16 @@ export default function EditCoursePage() {
       setDescription(c.description || "");
       setCategory(c.category || "");
       setDifficulty(c.difficulty);
-      setDeliveryMode(c.delivery_mode);
+      setDeliveryMode(c.delivery_mode || c.mode || "ONLINE");
       setDurationHours(c.duration_hours);
       setCapacity(c.capacity);
       setLocationState(c.location_state || "");
-      setSelectedSkills(c.skills || []);
+      const normalizedSkills: SkillBrief[] = (c.skills || []).map((s) => ({
+        id: s.skill_id || s.id,
+        name: s.skill_name || s.name || "Skill",
+        code: s.skill_code || s.code,
+      }));
+      setSelectedSkills(normalizedSkills);
       setModules(c.curriculum_modules || []);
       setEnrollments(enrs);
     } catch (err: unknown) {
@@ -117,7 +122,7 @@ export default function EditCoursePage() {
 
       // 2. Map canonical skills
       const skillUpdated = await trainingProviderAPI.mapSkills(courseId, {
-        skill_ids: selectedSkills.map((s) => s.id),
+        skill_ids: selectedSkills.map((s) => s.skill_id || s.id),
       });
 
       setCourse(skillUpdated);
@@ -551,7 +556,7 @@ export default function EditCoursePage() {
                 {difficulty}
               </span>
               <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-800 text-slate-300">
-                {deliveryMode.replace("_", " ")}
+                {(deliveryMode || "ONLINE").replace("_", " ")}
               </span>
               <span className="text-xs text-slate-500 font-mono">• {durationHours} Hours</span>
             </div>

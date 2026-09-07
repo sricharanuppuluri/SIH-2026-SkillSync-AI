@@ -3,6 +3,7 @@
 import uuid
 
 from fastapi import APIRouter, Depends, Query, status
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -24,6 +25,12 @@ from app.services import (
 router = APIRouter()
 
 
+class LessonProgressUpdateRequest(BaseModel):
+    """Payload for updating individual lesson progress status."""
+
+    completed: bool = True
+
+
 # ---------------------------------------------------------------------------
 # Course Discovery
 # ---------------------------------------------------------------------------
@@ -37,6 +44,7 @@ async def list_public_courses(
     skill_id: uuid.UUID | None = Query(None, description="Filter by canonical skill ID"),
     difficulty: CourseDifficulty | None = Query(None, description="Filter by difficulty"),
     mode: CourseMode | None = Query(None, description="Filter by course delivery mode"),
+    delivery_mode: CourseMode | None = Query(None, description="Filter by delivery mode alias"),
     category: str | None = Query(None, description="Filter by course category"),
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=100),
@@ -49,7 +57,7 @@ async def list_public_courses(
         search=search,
         skill_id=skill_id,
         difficulty=difficulty,
-        mode=mode,
+        mode=delivery_mode or mode,
         category=category,
         skip=skip,
         limit=limit,
@@ -59,15 +67,15 @@ async def list_public_courses(
 @router.get(
     "/courses/{course_id}",
     response_model=CourseResponse,
-    summary="Get published course details and curriculum",
+    summary="Get public course details",
 )
 async def get_public_course(
     course_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_roles(UserRole.CANDIDATE, UserRole.ADMIN)),
 ) -> CourseResponse:
-    """Retrieve details, canonical skills covered, curriculum structure, and remaining capacity."""
-    return await training_course_service.get_public_course_detail(db, course_id)
+    """Retrieve course details including curriculum modules and canonical skills."""
+    return await training_course_service.get_public_course_detail(db, course_id=course_id)
 
 
 # ---------------------------------------------------------------------------
@@ -77,14 +85,14 @@ async def get_public_course(
     "/courses/{course_id}/enroll",
     response_model=EnrollmentResponse,
     status_code=status.HTTP_201_CREATED,
-    summary="Enroll in a training course",
+    summary="Enroll authenticated candidate in a course",
 )
-async def enroll_in_course(
+async def enroll_course(
     course_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_roles(UserRole.CANDIDATE, UserRole.ADMIN)),
 ) -> EnrollmentResponse:
-    """Enroll candidate in published course with transactional capacity verification."""
+    """Transactionally enroll candidate into a published training course."""
     profile = await candidate_service.get_or_create_candidate_profile(db, current_user)
     return await enrollment_service.enroll_candidate(
         db, candidate_id=profile.id, course_id=course_id
@@ -125,6 +133,23 @@ async def get_enrollment_progress(
     )
 
 
+@router.get(
+    "/enrollments/{enrollment_id}/progress",
+    response_model=EnrollmentProgressResponse,
+    summary="Get detailed enrollment lesson progress (alias)",
+)
+async def get_enrollment_progress_alias(
+    enrollment_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_roles(UserRole.CANDIDATE, UserRole.ADMIN)),
+) -> EnrollmentProgressResponse:
+    """Retrieve breakdown of completed vs remaining lessons across course modules."""
+    profile = await candidate_service.get_or_create_candidate_profile(db, current_user)
+    return await enrollment_service.get_enrollment_progress(
+        db, candidate_id=profile.id, enrollment_id=enrollment_id
+    )
+
+
 @router.post(
     "/enrollments/{enrollment_id}/lessons/{lesson_id}/complete",
     response_model=EnrollmentProgressResponse,
@@ -145,4 +170,31 @@ async def mark_lesson_complete(
         candidate_id=profile.id,
         enrollment_id=enrollment_id,
         lesson_id=lesson_id,
+    )
+
+
+@router.put(
+    "/enrollments/{enrollment_id}/lessons/{lesson_id}/progress",
+    response_model=EnrollmentProgressResponse,
+    summary="Update curriculum lesson progress",
+)
+async def update_lesson_progress(
+    enrollment_id: uuid.UUID,
+    lesson_id: uuid.UUID,
+    body: LessonProgressUpdateRequest | None = None,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_roles(UserRole.CANDIDATE, UserRole.ADMIN)),
+) -> EnrollmentProgressResponse:
+    """Update progress for a lesson (mark completed or retrieve progress)."""
+    profile = await candidate_service.get_or_create_candidate_profile(db, current_user)
+    is_completed = body.completed if body is not None else True
+    if is_completed:
+        return await enrollment_service.complete_lesson(
+            db,
+            candidate_id=profile.id,
+            enrollment_id=enrollment_id,
+            lesson_id=lesson_id,
+        )
+    return await enrollment_service.get_enrollment_progress(
+        db, candidate_id=profile.id, enrollment_id=enrollment_id
     )

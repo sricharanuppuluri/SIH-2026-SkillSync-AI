@@ -13,6 +13,7 @@ import {
   Trash2,
   Users,
   Calendar,
+  FileText,
 } from "lucide-react";
 import { employerAPI } from "@/lib/api";
 import {
@@ -221,6 +222,16 @@ export default function JobDetailPage() {
 
         {/* Lifecycle Action Buttons */}
         <div className="flex items-center gap-2">
+          <Link href={`/employer/jobs/${job.id}/contract`}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-indigo-500/40 text-indigo-300 hover:bg-indigo-950/30 text-xs"
+            >
+              <FileText className="w-3.5 h-3.5 mr-1.5" />
+              Skill Contract
+            </Button>
+          </Link>
           {job.status === "DRAFT" && (
             <Button
               variant="primary"

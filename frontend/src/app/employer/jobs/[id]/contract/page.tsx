@@ -48,11 +48,16 @@ export default function JobContractPage() {
       try {
         const active = await contractAPI.getJobContract(jobId);
         setActiveContract(active);
-        const q = await contractAPI.getQuality(active.id).catch(() => null);
-        setQuality(q);
+        if (active && active.id) {
+          const q = await contractAPI.getQuality(active.id).catch(() => null);
+          setQuality(q);
+        } else {
+          setQuality(null);
+        }
       } catch {
         // If 404, no active contract exists
         setActiveContract(null);
+        setQuality(null);
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to load contract information for job");

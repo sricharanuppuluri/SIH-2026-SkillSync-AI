@@ -15,6 +15,7 @@ import {
   Users,
   MapPin,
   Calendar,
+  FileText,
 } from "lucide-react";
 import { employerAPI } from "@/lib/api";
 import { Job, JobStatus } from "@/types/employer";
@@ -191,7 +192,7 @@ export default function EmployerJobsPage() {
                     </Link>
                     {getJobStatusBadge(job.status)}
                     <span className="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-medium">
-                      {job.employment_type.replace("_", " ")}
+                      {(job.employment_type || "").replace("_", " ")}
                     </span>
                     <span className="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-medium">
                       {job.experience_level}
@@ -248,6 +249,13 @@ export default function EmployerJobsPage() {
                     <Button variant="outline" size="sm" className="h-8 text-xs">
                       <Edit className="w-3.5 h-3.5 mr-1" />
                       Edit
+                    </Button>
+                  </Link>
+
+                  <Link href={`/employer/jobs/${job.id}/contract`}>
+                    <Button variant="outline" size="sm" className="h-8 text-xs border-indigo-500/40 text-indigo-300 hover:bg-indigo-950/30">
+                      <FileText className="w-3.5 h-3.5 mr-1" />
+                      Contract
                     </Button>
                   </Link>
 
