@@ -220,6 +220,8 @@ export const ROLE_NAV_PERMISSIONS: Record<UserRole, string[]> = {
     "/training-provider/courses",
     "/training-provider/outcomes",
     "/training-provider/profile",
+    "/admin/skills",
+    "/jobs",
     "/tools/skill-extractor",
     "/tools/semantic-skill-match",
     "/demand",
@@ -228,6 +230,8 @@ export const ROLE_NAV_PERMISSIONS: Record<UserRole, string[]> = {
   ],
   GOVERNMENT: [
     "/dashboard",
+    "/admin/skills",
+    "/jobs",
     "/tools/skill-extractor",
     "/tools/semantic-skill-match",
     "/demand",
@@ -379,10 +383,10 @@ export function Sidebar({ collapsed, onToggleCollapse, className }: SidebarProps
         <div className="p-4 border-t border-slate-800/80 text-[11px] text-slate-500">
           <div className="flex items-center justify-between">
             <span>SkillSync AI</span>
-            <span className="text-indigo-400 font-mono">v0.6.0</span>
+            <span className="text-indigo-400 font-mono">v1.0.0-RC</span>
           </div>
-          <div className="text-[10px] text-slate-600 mt-0.5">
-            Phase 5 • Skill Intelligence
+          <div className="text-[10px] text-slate-500 mt-0.5">
+            SIH 2026 Release Candidate
           </div>
         </div>
       )}

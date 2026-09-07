@@ -64,7 +64,7 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
                 SkillSync <span className="text-indigo-400">AI</span>
               </span>
               <div className="text-[10px] text-slate-400 font-mono">
-                {user ? `${user.role} Portal` : "Phase 2 Shell"}
+                {user ? `${user.role} Portal` : "Release Candidate"}
               </div>
             </div>
           </div>
@@ -129,10 +129,10 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
         <div className="pt-4 border-t border-slate-800 text-[11px] text-slate-500">
           <div className="flex items-center justify-between">
             <span>SkillSync AI</span>
-            <span className="text-indigo-400 font-mono">v0.3.0</span>
+            <span className="text-indigo-400 font-mono">v1.0.0-RC</span>
           </div>
-          <p className="text-[10px] text-slate-600 mt-1">
-            Free &amp; Open-Source Modular Monolith
+          <p className="text-[10px] text-slate-500 mt-1">
+            SIH 2026 Release Candidate
           </p>
         </div>
       </div>
