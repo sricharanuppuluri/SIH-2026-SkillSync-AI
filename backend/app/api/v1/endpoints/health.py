@@ -38,28 +38,31 @@ async def get_health() -> HealthResponse:
 
     # Format database check result
     if isinstance(db_res, Exception):
+        err_msg = str(db_res) if settings.DEBUG else "Database connection unavailable"
         db_detail = DatabaseStatus(
             status="disconnected",
-            error=str(db_res),
+            error=err_msg,
         )
     else:
         db_detail = DatabaseStatus(**db_res)
 
     # Format redis check result
     if isinstance(redis_res, Exception):
+        err_msg = str(redis_res) if settings.DEBUG else "Redis cache unavailable"
         redis_detail = RedisStatus(
             status="disconnected",
-            error=str(redis_res),
+            error=err_msg,
         )
     else:
         redis_detail = RedisStatus(**redis_res)
 
     # Format AI check result
     if isinstance(ai_res, Exception):
+        err_msg = str(ai_res) if settings.DEBUG else "Local AI engine offline"
         ai_detail = AISubsystemStatus(
             status="offline",
             target_model=settings.OLLAMA_MODEL,
-            error=str(ai_res),
+            error=err_msg,
         )
     else:
         ai_detail = AISubsystemStatus(**ai_res)

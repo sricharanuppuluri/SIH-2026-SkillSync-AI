@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.deps import require_authenticated_user
+from app.core.rate_limiter import rate_limit
 from app.core.security import create_access_token, get_password_hash, verify_password
 from app.models.user import User, UserRole
 from app.schemas.auth import TokenResponse, UserLoginRequest, UserRegisterRequest, UserResponse
@@ -18,6 +19,7 @@ router = APIRouter()
     response_model=UserResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Register a new user account",
+    dependencies=[Depends(rate_limit(requests_per_minute=20))],
 )
 async def register(
     req: UserRegisterRequest,
@@ -63,6 +65,7 @@ async def register(
     response_model=TokenResponse,
     status_code=status.HTTP_200_OK,
     summary="Authenticate user and obtain JWT access token",
+    dependencies=[Depends(rate_limit(requests_per_minute=30))],
 )
 async def login(
     req: UserLoginRequest,

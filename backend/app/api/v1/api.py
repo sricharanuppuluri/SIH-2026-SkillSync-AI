@@ -6,14 +6,18 @@ from app.api.v1.endpoints import (
     auth,
     candidate,
     candidate_learning,
+    contracts,
     copilot,
     courses,
+    demand,
     employer,
     health,
     jobs,
+    outcomes,
     passport,
     profiles,
     rbac_test,
+    simulator,
     skills,
     training_provider,
 )
@@ -52,3 +56,17 @@ api_router.include_router(
 
 # Phase 12: Verified Skill Passport Endpoints
 api_router.include_router(passport.router, tags=["Verified Skill Passport"])
+
+# Phase 13: Skill Demand Digital Twin Endpoints
+api_router.include_router(demand.router, prefix="/demand", tags=["Skill Demand Digital Twin"])
+
+# Phase 15: What-If Skill Demand Simulator Endpoints
+api_router.include_router(
+    simulator.router, prefix="/simulator", tags=["What-If Skill Demand Simulator"]
+)
+
+# Phase 16: Employer Skill Contract Exchange Endpoints
+api_router.include_router(contracts.router, prefix="/contracts", tags=["Employer Skill Contracts"])
+
+# Phase 17: Employment Outcome Intelligence & Provider Performance Index Endpoints
+api_router.include_router(outcomes.router, prefix="/outcomes", tags=["Outcome Intelligence"])

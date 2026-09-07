@@ -211,7 +211,7 @@ async def test_semantic_fallback_and_thresholding() -> None:
         await session.flush()
 
         source_text = EmbeddingService.build_canonical_skill_source_text(
-            skill_name="Kubernetes Orchestration",
+            skill_name=skill.name,
             skill_type="TECHNICAL",
             category="DevOps",
             aliases=["Container Orchestration", "K8s Management"],

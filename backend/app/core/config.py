@@ -43,6 +43,9 @@ class Settings(BaseSettings):
     EXTRACTION_MAX_TEXT_LENGTH: int = 10000  # characters
     EXTRACTION_MIN_TEXT_LENGTH: int = 10  # characters
 
+    # Rate Limiting
+    RATE_LIMITING_ENABLED: bool = True
+
     # CORS Origins (comma-separated string or list)
     CORS_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000"
 

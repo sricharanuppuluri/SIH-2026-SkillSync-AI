@@ -11,6 +11,13 @@ from app.models.curriculum import CurriculumLesson, CurriculumModule
 from app.models.enrollment import Enrollment, EnrollmentStatus
 from app.models.enrollment_progress import EnrollmentLessonProgress
 from app.models.job import EmploymentType, ExperienceLevel, Job, JobSkill, JobStatus
+from app.models.outcome import (
+    PlacementOutcome,
+    PlacementTrainingAttribution,
+    PPITier,
+    ProviderPerformanceSnapshot,
+    RetentionStatus,
+)
 from app.models.passport_share import SkillPassportShare
 from app.models.profiles import (
     CandidateProfile,
@@ -26,6 +33,14 @@ from app.models.skill import (
     SkillStatus,
     SkillType,
 )
+from app.models.skill_contract import (
+    ContractEvidenceType,
+    ContractRequirementImportance,
+    ContractRequirementType,
+    ContractStatus,
+    SkillContract,
+    SkillContractRequirement,
+)
 from app.models.skill_embedding import SkillEmbedding
 from app.models.skill_evidence import EvidenceStatus, EvidenceType, SkillEvidence
 from app.models.user import User, UserRole
@@ -39,6 +54,10 @@ __all__ = [
     "CandidateExperience",
     "CandidateProfile",
     "CandidateSkill",
+    "ContractEvidenceType",
+    "ContractRequirementImportance",
+    "ContractRequirementType",
+    "ContractStatus",
     "CopilotConversation",
     "CopilotMessage",
     "Course",
@@ -60,9 +79,16 @@ __all__ = [
     "Job",
     "JobSkill",
     "JobStatus",
+    "PPITier",
+    "PlacementOutcome",
+    "PlacementTrainingAttribution",
     "ProficiencyLevel",
+    "ProviderPerformanceSnapshot",
+    "RetentionStatus",
     "Skill",
     "SkillAlias",
+    "SkillContract",
+    "SkillContractRequirement",
     "SkillEmbedding",
     "SkillEvidence",
     "SkillPassportShare",
