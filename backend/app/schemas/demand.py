@@ -173,3 +173,150 @@ class SkillDemandDetailResponse(BaseModel):
     top_locations: list[SkillDemandLocationItem] = Field(default_factory=list)
     historical_trends: list[SkillDemandTrendItem] = Field(default_factory=list)
     related_skills: list[str] = Field(default_factory=list)
+
+
+# ===========================================================================
+# Phase 14: Skill Demand Forecasting Schemas
+# ===========================================================================
+
+
+class ForecastModelType(enum.StrEnum):
+    """Statistical model selected for forecasting."""
+
+    HOLT = "holt"
+    LINEAR_TREND = "linear_trend"
+    BASELINE_FALLBACK = "baseline_fallback"
+    MOVING_AVERAGE = "moving_average"
+
+
+class DemandGrowthTrend(enum.StrEnum):
+    """Deterministic demand trajectory classification."""
+
+    INCREASING = "INCREASING"
+    STABLE = "STABLE"
+    DECLINING = "DECLINING"
+
+
+class DemandSeriesPoint(BaseModel):
+    """Data point in the unified actual vs forecast time series."""
+
+    month: str = Field(..., description="Human-readable month, e.g. 'January 2026'")
+    month_date: str = Field(..., description="ISO format date YYYY-MM-01")
+    actual_demand: int | None = Field(default=None, description="Actual observed demand")
+    predicted_demand: int | None = Field(
+        default=None, description="Forecasted/predicted future demand"
+    )
+    lower_bound: int | None = Field(default=None, description="Lower confidence interval bound")
+    upper_bound: int | None = Field(default=None, description="Upper confidence interval bound")
+    data_type: str = Field(..., description="'ACTUAL' or 'FORECAST'")
+
+
+class SkillForecastMonthItem(BaseModel):
+    """Forecast details for a single forward-looking month."""
+
+    forecast_month: str = Field(..., description="Forecast period label, e.g. 'March 2026'")
+    forecast_month_date: str = Field(..., description="ISO date YYYY-MM-01")
+    predicted_demand: int = Field(default=0, ge=0, description="Predicted demand count (>= 0)")
+    lower_bound: int = Field(default=0, ge=0, description="Lower bound of 95% confidence interval")
+    upper_bound: int = Field(default=0, ge=0, description="Upper bound of 95% confidence interval")
+    confidence_level: float = Field(default=0.95, description="Confidence level (0.95 = 95%)")
+
+
+class SkillForecastResponse(BaseModel):
+    """Comprehensive 360 forecast detail for a specific skill."""
+
+    skill_id: uuid.UUID
+    skill_name: str
+    category: str | None = None
+    skill_type: str | None = None
+    current_actual_demand: int = Field(
+        default=0, description="Latest known actual monthly demand count"
+    )
+    latest_actual_month: str | None = Field(
+        default=None, description="Period of the latest actual demand data"
+    )
+    forecast_horizon_months: int = Field(default=3, description="Forecast horizon in months (1-12)")
+    model_used: str = Field(
+        default="baseline_fallback", description="Name of statistical model applied"
+    )
+    historical_observations_count: int = Field(
+        default=0, description="Number of historical monthly data points used"
+    )
+    confidence_level: float = Field(default=0.95, description="Confidence interval percentage")
+    forecasted_demand_end: int = Field(
+        default=0, description="Projected demand at the end of the horizon"
+    )
+    expected_growth_percentage: float = Field(
+        default=0.0, description="Projected percentage growth from latest actual"
+    )
+    growth_trend: DemandGrowthTrend = Field(
+        default=DemandGrowthTrend.STABLE, description="INCREASING, STABLE, or DECLINING"
+    )
+    growth_interpretation: str = Field(
+        ..., description="Deterministic human-readable explanation of trend"
+    )
+    current_verified_supply: int = Field(
+        default=0, description="Current Phase 12 verified candidate supply"
+    )
+    current_shortage_status: SkillShortageStatus = Field(
+        default=SkillShortageStatus.BALANCED,
+        description="Phase 13 current actual demand shortage status",
+    )
+    forecasted_demand_supply_ratio: float = Field(
+        default=0.0, description="forecasted_demand_end / max(current_verified_supply, 1)"
+    )
+    forecasted_shortage_status: SkillShortageStatus = Field(
+        default=SkillShortageStatus.BALANCED,
+        description="Projected shortage status based on forecast demand vs current supply",
+    )
+    available_training_courses_count: int = Field(
+        default=0, description="Phase 11 published courses available for this skill"
+    )
+    training_insight: str = Field(
+        ..., description="Relationship summary between forecast demand and training capacity"
+    )
+    evaluation_mae: float | None = Field(
+        default=None, description="Mean Absolute Error from backtesting evaluation (if feasible)"
+    )
+    monthly_forecasts: list[SkillForecastMonthItem] = Field(default_factory=list)
+    combined_series: list[DemandSeriesPoint] = Field(
+        default_factory=list,
+        description="Unified chronological actual + forecast points for charts",
+    )
+
+
+class GlobalForecastSummaryItem(BaseModel):
+    """Summary item in the global demand forecast leaderboard."""
+
+    skill_id: uuid.UUID
+    skill_name: str
+    category: str | None = None
+    skill_type: str | None = None
+    current_demand: int = Field(default=0, description="Current actual demand")
+    forecasted_demand: int = Field(default=0, description="Forecasted demand at horizon end")
+    growth_percentage: float = Field(default=0.0, description="Expected growth percentage")
+    growth_trend: DemandGrowthTrend = Field(default=DemandGrowthTrend.STABLE)
+    current_shortage_status: SkillShortageStatus = Field(default=SkillShortageStatus.BALANCED)
+    forecasted_shortage_status: SkillShortageStatus = Field(default=SkillShortageStatus.BALANCED)
+    model_used: str = Field(default="baseline_fallback")
+    lower_bound: int = Field(default=0)
+    upper_bound: int = Field(default=0)
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class GlobalForecastOverviewResponse(BaseModel):
+    """Global multi-skill forecasting leaderboard response."""
+
+    horizon_months: int = Field(default=3, description="Forecast horizon in months")
+    total_current_demand: int = Field(default=0, description="Total active demand across skills")
+    total_forecasted_demand: int = Field(
+        default=0, description="Total projected demand across skills"
+    )
+    overall_growth_percentage: float = Field(
+        default=0.0, description="Aggregate projected growth rate"
+    )
+    top_growing_skills: list[GlobalForecastSummaryItem] = Field(default_factory=list)
+    top_declining_skills: list[GlobalForecastSummaryItem] = Field(default_factory=list)
+    high_forecast_shortage_skills: list[GlobalForecastSummaryItem] = Field(default_factory=list)
+    forecast_items: list[GlobalForecastSummaryItem] = Field(default_factory=list)

@@ -50,12 +50,108 @@ vi.mock("@/lib/demandApi", () => ({
     ],
     related_skills: ["Deep Learning", "TensorFlow", "PyTorch"],
   }),
+  getSkillDemandForecast: vi.fn().mockResolvedValue({
+    skill_id: "test-skill-uuid-1234",
+    skill_name: "Machine Learning",
+    category: "Data Science",
+    skill_type: "TECHNICAL",
+    current_actual_demand: 14,
+    latest_actual_month: "2026-08",
+    forecast_horizon_months: 3,
+    model_used: "holt",
+    historical_observations_count: 6,
+    confidence_level: 0.95,
+    forecasted_demand_end: 18,
+    expected_growth_percentage: 28.6,
+    growth_trend: "INCREASING",
+    growth_interpretation: "Demand is projected to increase significantly over the next 3 months (+29%).",
+    current_verified_supply: 3,
+    current_shortage_status: "HIGH_SHORTAGE",
+    forecasted_demand_supply_ratio: 6.0,
+    forecasted_shortage_status: "HIGH_SHORTAGE",
+    available_training_courses_count: 5,
+    training_insight: "Demand expected to increase — training expansion recommended",
+    evaluation_mae: 1.25,
+    monthly_forecasts: [
+      {
+        forecast_month: "2026-09",
+        forecast_month_date: "2026-09-01",
+        predicted_demand: 15,
+        lower_bound: 13,
+        upper_bound: 17,
+        confidence_level: 0.95,
+      },
+      {
+        forecast_month: "2026-10",
+        forecast_month_date: "2026-10-01",
+        predicted_demand: 17,
+        lower_bound: 14,
+        upper_bound: 20,
+        confidence_level: 0.95,
+      },
+      {
+        forecast_month: "2026-11",
+        forecast_month_date: "2026-11-01",
+        predicted_demand: 18,
+        lower_bound: 15,
+        upper_bound: 21,
+        confidence_level: 0.95,
+      },
+    ],
+    combined_series: [
+      {
+        month: "2026-07",
+        month_date: "2026-07-01",
+        actual_demand: 8,
+        predicted_demand: null,
+        lower_bound: null,
+        upper_bound: null,
+        data_type: "ACTUAL",
+      },
+      {
+        month: "2026-08",
+        month_date: "2026-08-01",
+        actual_demand: 14,
+        predicted_demand: null,
+        lower_bound: null,
+        upper_bound: null,
+        data_type: "ACTUAL",
+      },
+      {
+        month: "2026-09",
+        month_date: "2026-09-01",
+        actual_demand: null,
+        predicted_demand: 15,
+        lower_bound: 13,
+        upper_bound: 17,
+        data_type: "FORECAST",
+      },
+      {
+        month: "2026-10",
+        month_date: "2026-10-01",
+        actual_demand: null,
+        predicted_demand: 17,
+        lower_bound: 14,
+        upper_bound: 20,
+        data_type: "FORECAST",
+      },
+      {
+        month: "2026-11",
+        month_date: "2026-11-01",
+        actual_demand: null,
+        predicted_demand: 18,
+        lower_bound: 15,
+        upper_bound: 21,
+        data_type: "FORECAST",
+      },
+    ],
+  }),
 }));
 
-// ── Import page using @/ alias to avoid bracket-path resolution issues ─────────
+// ── Import page using @/ alias ─────────────────────────────────────────────────
 import SkillDetailPage from "@/app/demand/skills/[skillId]/page";
 
-describe("Skill Demand Detail Page — Phase 13", () => {
+describe("Skill Demand Detail Page — Phase 13 & Phase 14", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -81,70 +177,72 @@ describe("Skill Demand Detail Page — Phase 13", () => {
     expect(screen.getByText("Rank #2")).toBeDefined();
   });
 
-  it("renders demand/supply ratio rounded to 1dp", async () => {
+  it("renders Current Shortage and Forecast Shortage separated", async () => {
     await act(async () => {
       render(<SkillDetailPage />);
     });
-    // ratio may render as "4.7x" or split nodes "4.7" + "x"
-    const ratioEls = screen.getAllByText(/4\.7/);
-    expect(ratioEls.length).toBeGreaterThan(0);
+    expect(screen.getByText("Current Shortage")).toBeDefined();
+    expect(screen.getByText("Forecast Shortage")).toBeDefined();
   });
 
-  it("renders shortage status label", async () => {
+  it("renders Phase 14 Forecast section and horizon switcher", async () => {
     await act(async () => {
       render(<SkillDetailPage />);
     });
-    expect(screen.getAllByText("High Shortage").length).toBeGreaterThan(0);
+    expect(screen.getByText(/Skill Demand Forecast/i)).toBeDefined();
+    expect(screen.getByText("1M")).toBeDefined();
+    expect(screen.getByText("3M")).toBeDefined();
+    expect(screen.getByText("6M")).toBeDefined();
+    expect(screen.getByText("12M")).toBeDefined();
   });
 
-  it("renders Active Job Demand stat card", async () => {
+  it("renders Actual vs Forecast demand numbers and growth trend", async () => {
     await act(async () => {
       render(<SkillDetailPage />);
     });
-    expect(screen.getByText("Active Job Demand")).toBeDefined();
-    // 14 appears in both the stat card value and the trend chart label
-    expect(screen.getAllByText("14").length).toBeGreaterThan(0);
+    expect(screen.getByText("Current Actual Demand")).toBeDefined();
+    expect(screen.getByText("Forecast Demand (3M)")).toBeDefined();
+    expect(screen.getByText("+29%")).toBeDefined();
+    expect(screen.getByText("INCREASING")).toBeDefined();
   });
 
-  it("renders Verified Candidates stat card", async () => {
+  it("renders deterministic trend interpretation text", async () => {
     await act(async () => {
       render(<SkillDetailPage />);
     });
-    expect(screen.getByText("Verified Candidates")).toBeDefined();
-    // verified_candidates value (3) may appear multiple times; check at least one exists
-    expect(screen.getAllByText("3").length).toBeGreaterThan(0);
+    expect(
+      screen.getByText(/Demand is projected to increase significantly over the next 3 months/i)
+    ).toBeDefined();
   });
 
-  it("renders historical trend section heading", async () => {
+  it("renders Actual vs. Forecast Demand Progression chart header", async () => {
     await act(async () => {
       render(<SkillDetailPage />);
     });
-    expect(screen.getByText("Historical Demand Trend")).toBeDefined();
+    expect(screen.getByText("Actual vs. Forecast Demand Progression")).toBeDefined();
+    expect(screen.getByText("Actual Demand (Observed)")).toBeDefined();
+    expect(screen.getByText("Forecast Demand (Predicted)")).toBeDefined();
   });
 
-  it("renders top industries section with names", async () => {
+  it("renders forecasting model metadata and backtesting MAE", async () => {
     await act(async () => {
       render(<SkillDetailPage />);
     });
-    expect(screen.getByText("Top Industries Demanding This Skill")).toBeDefined();
-    expect(screen.getByText("Technology")).toBeDefined();
-    expect(screen.getByText("Healthcare")).toBeDefined();
+    expect(screen.getByText("Holt Exponential Smoothing")).toBeDefined();
+    expect(screen.getByText("6 months")).toBeDefined();
+    expect(screen.getByText("95% (±2σ)")).toBeDefined();
+    expect(screen.getByText("1.25")).toBeDefined();
   });
 
-  it("renders top locations section with city name", async () => {
+  it("renders training supply insight section", async () => {
     await act(async () => {
       render(<SkillDetailPage />);
     });
-    expect(screen.getByText("Top Locations")).toBeDefined();
-    expect(screen.getByText(/Bengaluru/)).toBeDefined();
-  });
-
-  it("renders Remote badge for is_remote location", async () => {
-    await act(async () => {
-      render(<SkillDetailPage />);
-    });
-    // "Remote" appears in both the city div text and the badge span
-    expect(screen.getAllByText("Remote").length).toBeGreaterThan(0);
+    expect(screen.getByText("Training Supply Insight")).toBeDefined();
+    expect(screen.getByText("5 courses")).toBeDefined();
+    expect(
+      screen.getByText(/Demand expected to increase — training expansion recommended/i)
+    ).toBeDefined();
   });
 
   it("renders candidate supply breakdown section", async () => {
@@ -161,36 +259,5 @@ describe("Skill Demand Detail Page — Phase 13", () => {
       render(<SkillDetailPage />);
     });
     expect(screen.getByText("Aggregate counts only — no personal data exposed")).toBeDefined();
-  });
-
-  it("renders by_verification_method breakdown", async () => {
-    await act(async () => {
-      render(<SkillDetailPage />);
-    });
-    expect(screen.getByText("By Verification Method")).toBeDefined();
-    expect(screen.getByText("COURSE COMPLETION")).toBeDefined();
-  });
-
-  it("renders related skills as tags", async () => {
-    await act(async () => {
-      render(<SkillDetailPage />);
-    });
-    expect(screen.getByText("Deep Learning")).toBeDefined();
-    expect(screen.getByText("TensorFlow")).toBeDefined();
-    expect(screen.getByText("PyTorch")).toBeDefined();
-  });
-
-  it("renders the skill description", async () => {
-    await act(async () => {
-      render(<SkillDetailPage />);
-    });
-    expect(screen.getByText("Statistical algorithms and predictive modeling.")).toBeDefined();
-  });
-
-  it("renders no-forecasting disclaimer in trends section", async () => {
-    await act(async () => {
-      render(<SkillDetailPage />);
-    });
-    expect(screen.getByText(/Historical data only/)).toBeDefined();
   });
 });

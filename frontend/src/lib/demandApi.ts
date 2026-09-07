@@ -7,14 +7,17 @@
 
 import { fetchAPI } from "./api";
 import type {
+  ForecastFilters,
   DemandListFilters,
   DemandOverviewResponse,
+  GlobalForecastOverviewResponse,
   SkillDemandDetailResponse,
   SkillDemandIndustryItem,
   SkillDemandLocationItem,
   SkillDemandSummaryItem,
   SkillDemandTrainingItem,
   SkillDemandTrendItem,
+  SkillForecastResponse,
   SkillSupplyBreakdown,
 } from "@/types/demand";
 
@@ -112,4 +115,35 @@ export async function getSkillDemandTraining(
   skillId: string
 ): Promise<SkillDemandTrainingItem[]> {
   return fetchAPI<SkillDemandTrainingItem[]>(`${BASE}/skills/${skillId}/training`);
+}
+
+/**
+ * Phase 14: Fetch multi-skill demand forecast overview and projections.
+ * Requires authentication.
+ */
+export async function getDemandForecastOverview(
+  filters: ForecastFilters = {}
+): Promise<GlobalForecastOverviewResponse> {
+  const params = new URLSearchParams();
+  if (filters.horizon !== undefined) params.set("horizon", String(filters.horizon));
+  if (filters.skill_id) params.set("skill_id", filters.skill_id);
+  if (filters.industry) params.set("industry", filters.industry);
+  if (filters.location) params.set("location", filters.location);
+  if (filters.limit !== undefined) params.set("limit", String(filters.limit));
+  const qs = params.toString();
+  return fetchAPI<GlobalForecastOverviewResponse>(`${BASE}/forecast${qs ? `?${qs}` : ""}`);
+}
+
+/**
+ * Phase 14: Fetch detailed statistical forecast for a canonical skill.
+ * Requires authentication.
+ */
+export async function getSkillDemandForecast(
+  skillId: string,
+  horizon?: number
+): Promise<SkillForecastResponse> {
+  const params = new URLSearchParams();
+  if (horizon !== undefined) params.set("horizon", String(horizon));
+  const qs = params.toString();
+  return fetchAPI<SkillForecastResponse>(`${BASE}/skills/${skillId}/forecast${qs ? `?${qs}` : ""}`);
 }

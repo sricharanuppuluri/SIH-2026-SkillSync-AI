@@ -106,3 +106,96 @@ export interface DemandListFilters {
   skip?: number;
   limit?: number;
 }
+
+// ---------------------------------------------------------------------------
+// Phase 14: Demand Forecasting Types
+// ---------------------------------------------------------------------------
+
+export type ForecastModelType =
+  | "holt"
+  | "linear_trend"
+  | "baseline_fallback"
+  | "moving_average";
+
+export type DemandGrowthTrend = "INCREASING" | "STABLE" | "DECLINING";
+
+export interface DemandSeriesPoint {
+  month: string;
+  month_date: string;
+  actual_demand?: number | null;
+  predicted_demand?: number | null;
+  lower_bound?: number | null;
+  upper_bound?: number | null;
+  data_type: "ACTUAL" | "FORECAST";
+}
+
+export interface SkillForecastMonthItem {
+  forecast_month: string;
+  forecast_month_date: string;
+  predicted_demand: number;
+  lower_bound: number;
+  upper_bound: number;
+  confidence_level: number;
+}
+
+export interface SkillForecastResponse {
+  skill_id: string;
+  skill_name: string;
+  category: string | null;
+  skill_type: string | null;
+  current_actual_demand: number;
+  latest_actual_month: string | null;
+  forecast_horizon_months: number;
+  model_used: string;
+  historical_observations_count: number;
+  confidence_level: number;
+  forecasted_demand_end: number;
+  expected_growth_percentage: number;
+  growth_trend: DemandGrowthTrend;
+  growth_interpretation: string;
+  current_verified_supply: number;
+  current_shortage_status: SkillShortageStatus;
+  forecasted_demand_supply_ratio: number;
+  forecasted_shortage_status: SkillShortageStatus;
+  available_training_courses_count: number;
+  training_insight: string;
+  evaluation_mae?: number | null;
+  monthly_forecasts: SkillForecastMonthItem[];
+  combined_series: DemandSeriesPoint[];
+}
+
+export interface GlobalForecastSummaryItem {
+  skill_id: string;
+  skill_name: string;
+  category: string | null;
+  skill_type: string | null;
+  current_demand: number;
+  forecasted_demand: number;
+  growth_percentage: number;
+  growth_trend: DemandGrowthTrend;
+  current_shortage_status: SkillShortageStatus;
+  forecasted_shortage_status: SkillShortageStatus;
+  model_used: string;
+  lower_bound: number;
+  upper_bound: number;
+}
+
+export interface GlobalForecastOverviewResponse {
+  horizon_months: number;
+  total_current_demand: number;
+  total_forecasted_demand: number;
+  overall_growth_percentage: number;
+  top_growing_skills: GlobalForecastSummaryItem[];
+  top_declining_skills: GlobalForecastSummaryItem[];
+  high_forecast_shortage_skills: GlobalForecastSummaryItem[];
+  forecast_items: GlobalForecastSummaryItem[];
+}
+
+export interface ForecastFilters {
+  horizon?: number;
+  skill_id?: string;
+  industry?: string;
+  location?: string;
+  limit?: number;
+}
+

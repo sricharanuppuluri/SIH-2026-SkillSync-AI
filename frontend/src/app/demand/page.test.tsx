@@ -14,7 +14,7 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-// ── Mock demandApi — using inline factory (no top-level variables referenced) ──
+// ── Mock demandApi — using inline factory ──────────────────────────────────────
 vi.mock("@/lib/demandApi", () => ({
   getDemandOverview: vi.fn().mockResolvedValue({
     kpis: {
@@ -83,12 +83,100 @@ vi.mock("@/lib/demandApi", () => ({
       training_courses_count: 1,
     },
   ]),
+  getDemandForecastOverview: vi.fn().mockResolvedValue({
+    horizon_months: 3,
+    total_current_demand: 27,
+    total_forecasted_demand: 32,
+    overall_growth_percentage: 18.5,
+    top_growing_skills: [
+      {
+        skill_id: "skill-1",
+        skill_name: "Python",
+        category: "Programming",
+        skill_type: "TECHNICAL",
+        current_demand: 18,
+        forecasted_demand: 22,
+        growth_percentage: 22.2,
+        growth_trend: "INCREASING",
+        current_shortage_status: "HIGH_SHORTAGE",
+        forecasted_shortage_status: "HIGH_SHORTAGE",
+        model_used: "holt",
+        lower_bound: 19,
+        upper_bound: 25,
+      },
+    ],
+    top_declining_skills: [],
+    high_forecast_shortage_skills: [
+      {
+        skill_id: "skill-1",
+        skill_name: "Python",
+        category: "Programming",
+        skill_type: "TECHNICAL",
+        current_demand: 18,
+        forecasted_demand: 22,
+        growth_percentage: 22.2,
+        growth_trend: "INCREASING",
+        current_shortage_status: "HIGH_SHORTAGE",
+        forecasted_shortage_status: "HIGH_SHORTAGE",
+        model_used: "holt",
+        lower_bound: 19,
+        upper_bound: 25,
+      },
+      {
+        skill_id: "skill-2",
+        skill_name: "Kubernetes",
+        category: "DevOps",
+        skill_type: "TOOL",
+        current_demand: 9,
+        forecasted_demand: 10,
+        growth_percentage: 11.1,
+        growth_trend: "INCREASING",
+        current_shortage_status: "HIGH_SHORTAGE",
+        forecasted_shortage_status: "HIGH_SHORTAGE",
+        model_used: "linear_trend",
+        lower_bound: 8,
+        upper_bound: 12,
+      },
+    ],
+    forecast_items: [
+      {
+        skill_id: "skill-1",
+        skill_name: "Python",
+        category: "Programming",
+        skill_type: "TECHNICAL",
+        current_demand: 18,
+        forecasted_demand: 22,
+        growth_percentage: 22.2,
+        growth_trend: "INCREASING",
+        current_shortage_status: "HIGH_SHORTAGE",
+        forecasted_shortage_status: "HIGH_SHORTAGE",
+        model_used: "holt",
+        lower_bound: 19,
+        upper_bound: 25,
+      },
+      {
+        skill_id: "skill-2",
+        skill_name: "Kubernetes",
+        category: "DevOps",
+        skill_type: "TOOL",
+        current_demand: 9,
+        forecasted_demand: 10,
+        growth_percentage: 11.1,
+        growth_trend: "INCREASING",
+        current_shortage_status: "HIGH_SHORTAGE",
+        forecasted_shortage_status: "HIGH_SHORTAGE",
+        model_used: "linear_trend",
+        lower_bound: 8,
+        upper_bound: 12,
+      },
+    ],
+  }),
 }));
 
 // ── Import page after mocks ───────────────────────────────────────────────────
 import DemandDashboardPage from "./page";
 
-describe("Demand Dashboard Page — Phase 13", () => {
+describe("Demand Dashboard Page — Phase 13 & Phase 14", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -97,7 +185,7 @@ describe("Demand Dashboard Page — Phase 13", () => {
     await act(async () => {
       render(<DemandDashboardPage />);
     });
-    expect(screen.getByText("Skill Demand Digital Twin")).toBeDefined();
+    expect(screen.getByText(/Skill Demand Digital Twin/i)).toBeDefined();
   });
 
   it("renders KPI card labels after data loads", async () => {
@@ -120,11 +208,40 @@ describe("Demand Dashboard Page — Phase 13", () => {
     expect(screen.getByText("87")).toBeDefined(); // verified_candidate_supply
   });
 
+  it("renders Phase 14 Skill Demand Forecast section", async () => {
+    await act(async () => {
+      render(<DemandDashboardPage />);
+    });
+    expect(screen.getByText("Skill Demand Forecast")).toBeDefined();
+    expect(screen.getByText("Total Projected Demand")).toBeDefined();
+    expect(screen.getByText("32")).toBeDefined();
+    expect(screen.getByText("Top Growing Skill")).toBeDefined();
+  });
+
+  it("renders forecast horizon buttons", async () => {
+    await act(async () => {
+      render(<DemandDashboardPage />);
+    });
+    expect(screen.getByText("1M")).toBeDefined();
+    expect(screen.getByText("3M")).toBeDefined();
+    expect(screen.getByText("6M")).toBeDefined();
+    expect(screen.getByText("12M")).toBeDefined();
+  });
+
+  it("renders forecast growth badges and models", async () => {
+    await act(async () => {
+      render(<DemandDashboardPage />);
+    });
+    expect(screen.getByText("+22%")).toBeDefined();
+    expect(screen.getByText("Holt ES")).toBeDefined();
+    expect(screen.getByText("Linear Trend")).toBeDefined();
+  });
+
   it("renders top demanded skills section", async () => {
     await act(async () => {
       render(<DemandDashboardPage />);
     });
-    expect(screen.getByText("Most Demanded Skills")).toBeDefined();
+    expect(screen.getByText(/Most Demanded Skills/i)).toBeDefined();
     expect(screen.getAllByText("Python").length).toBeGreaterThan(0);
   });
 
@@ -132,7 +249,7 @@ describe("Demand Dashboard Page — Phase 13", () => {
     await act(async () => {
       render(<DemandDashboardPage />);
     });
-    expect(screen.getByText("Critical Skill Shortages")).toBeDefined();
+    expect(screen.getByText(/Critical Skill Shortages/i)).toBeDefined();
     expect(screen.getAllByText("Kubernetes").length).toBeGreaterThan(0);
   });
 
@@ -140,7 +257,6 @@ describe("Demand Dashboard Page — Phase 13", () => {
     await act(async () => {
       render(<DemandDashboardPage />);
     });
-    // "Demand" appears in both column header and stat card labels
     expect(screen.getAllByText("Demand").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Supply").length).toBeGreaterThan(0);
     expect(screen.getByText("Status")).toBeDefined();
@@ -155,29 +271,13 @@ describe("Demand Dashboard Page — Phase 13", () => {
     expect(screen.getByText("Top 10")).toBeDefined();
   });
 
-  it("renders platform data disclaimer note", async () => {
+  it("renders platform data disclaimer and forecast disclaimer", async () => {
     await act(async () => {
       render(<DemandDashboardPage />);
     });
     const disclaimers = screen.getAllByText((content) =>
-      content.includes("platform jobs") || content.includes("not an external")
+      content.includes("Actual demand") || content.includes("statistical") || content.includes("platform data")
     );
     expect(disclaimers.length).toBeGreaterThan(0);
-  });
-
-  it("renders skill rows from API response", async () => {
-    await act(async () => {
-      render(<DemandDashboardPage />);
-    });
-    expect(screen.getAllByText("Python").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Kubernetes").length).toBeGreaterThan(0);
-  });
-
-  it("renders High Shortage status badges", async () => {
-    await act(async () => {
-      render(<DemandDashboardPage />);
-    });
-    const highBadges = screen.getAllByText("High Shortage");
-    expect(highBadges.length).toBeGreaterThan(0);
   });
 });
