@@ -10,9 +10,9 @@ Usage:
 
 import asyncio
 import logging
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import AsyncSessionLocal
@@ -124,7 +124,7 @@ async def seed_demo_ecosystem(session: AsyncSession) -> dict[str, int]:
             location_state="Karnataka",
             website_url="https://nsa.example.org",
             contact_email="contact@nsa.example.org",
-            accreditation_details="NSDC Accredited Tier-1 Training Partner",
+            description="NSDC Accredited Tier-1 Training Partner",
         )
         session.add(tp_profile)
         await session.flush()
@@ -183,14 +183,12 @@ async def seed_demo_ecosystem(session: AsyncSession) -> dict[str, int]:
     if not emp_profile:
         emp_profile = EmployerProfile(
             user_id=emp_user.id,
-            company_name="Apex Tech Solutions",
+            company_name="TechNova Digital Solutions",
             company_description="Leading provider of cloud & AI software products.",
             industry="Information Technology",
             location_city="Bengaluru",
             location_state="Karnataka",
-            website_url="https://apextech.example.com",
-            contact_email="hiring@apextech.example.com",
-            company_size="50-200",
+            website_url="https://technova.example.com",
         )
         session.add(emp_profile)
         await session.flush()
@@ -330,9 +328,9 @@ async def seed_demo_ecosystem(session: AsyncSession) -> dict[str, int]:
             ),
             experience_years=2.0,
             education_level="B.Tech Computer Science & Engineering",
+            current_role="Junior Software Engineer",
             location_city="Bengaluru",
             location_state="Karnataka",
-            profile_completeness_pct=100.0,
         )
         session.add(cand_profile)
         await session.flush()
@@ -352,14 +350,14 @@ async def seed_demo_ecosystem(session: AsyncSession) -> dict[str, int]:
         session.add(
             CandidateExperience(
                 candidate_id=cand_profile.id,
-                company_name="CloudTech Innovations",
-                job_title="Software Engineering Intern",
-                start_date=date(2024, 1, 15),
-                end_date=date(2024, 6, 30),
+                company="CloudTech Innovations",
+                title="Software Engineering Intern",
+                start_date="2024-01-15",
+                end_date="2024-06-30",
                 description=(
                     "Built RESTful APIs in FastAPI and integrated PostgreSQL backend models."
                 ),
-                location_city="Bengaluru",
+                location="Bengaluru",
             )
         )
         session.add(
@@ -579,9 +577,66 @@ async def seed_demo_ecosystem(session: AsyncSession) -> dict[str, int]:
     }
 
 
+async def reset_demo_ecosystem(session: AsyncSession) -> None:
+    """Safely reset demo ecosystem fixtures while keeping canonical skill catalog intact."""
+    logger.info("[*] Resetting demo ecosystem fixtures...")
+    demo_emails = [
+        "admin@skillsync.internal",
+        "dev.provider@skillsync.internal",
+        "dev.employer@skillsync.internal",
+        "dev.candidate@skillsync.internal",
+        "dev.gov@skillsync.internal",
+    ]
+    user_stmt = select(User).where(User.email.in_(demo_emails))
+    users = (await session.execute(user_stmt)).scalars().all()
+    user_ids = [u.id for u in users]
+    if user_ids:
+        # Delete related child records first in dependency order
+        await session.execute(delete(PlacementTrainingAttribution))
+        await session.execute(delete(PlacementOutcome))
+        await session.execute(delete(ProviderPerformanceSnapshot))
+        await session.execute(delete(Application))
+        await session.execute(delete(VerifiedSkill))
+        await session.execute(delete(Enrollment))
+        await session.execute(delete(CandidateSkill))
+        await session.execute(delete(CandidateExperience))
+        await session.execute(delete(CandidateEducation))
+        await session.execute(
+            delete(CandidateProfile).where(CandidateProfile.user_id.in_(user_ids))
+        )
+        await session.execute(delete(SkillContractRequirement))
+        await session.execute(delete(SkillContract))
+        await session.execute(delete(JobSkill))
+        await session.execute(delete(Job))
+        await session.execute(delete(EmployerProfile).where(EmployerProfile.user_id.in_(user_ids)))
+        await session.execute(delete(CourseSkill))
+        await session.execute(delete(Course))
+        await session.execute(
+            delete(TrainingProviderProfile).where(TrainingProviderProfile.user_id.in_(user_ids))
+        )
+        await session.execute(
+            delete(GovernmentProfile).where(GovernmentProfile.user_id.in_(user_ids))
+        )
+        await session.execute(delete(User).where(User.id.in_(user_ids)))
+        await session.commit()
+        logger.info("[+] Cleared demo transactional records successfully.")
+
+
 async def main() -> None:
     """Entrypoint for executing database seeding."""
+    import argparse
+
+    parser = argparse.ArgumentParser(description="SkillSync AI Demo Database Seeder")
+    parser.add_argument(
+        "--reset",
+        action="store_true",
+        help="Reset demo records before deterministic seeding",
+    )
+    args = parser.parse_args()
+
     async with AsyncSessionLocal() as session:
+        if args.reset:
+            await reset_demo_ecosystem(session)
         await seed_demo_ecosystem(session)
 
 

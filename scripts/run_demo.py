@@ -32,10 +32,14 @@ def check_backend_migrations() -> bool:
     return False
 
 
-def seed_demo_data() -> bool:
-    print("[*] Seeding deterministic demo data...")
+def seed_demo_data(reset: bool = False) -> bool:
+    action_str = "Resetting and seeding" if reset else "Seeding"
+    print(f"[*] {action_str} deterministic demo data...")
+    cmd = ["uv", "run", "python", "-m", "app.db.seed"]
+    if reset:
+        cmd.append("--reset")
     res = subprocess.run(
-        ["uv", "run", "python", "-m", "app.db.seed"],
+        cmd,
         cwd=BACKEND_DIR,
         capture_output=True,
         text=True,
@@ -43,13 +47,14 @@ def seed_demo_data() -> bool:
     if res.returncode == 0:
         print("  [+] Demo data seeded successfully.")
         return True
-    print("  [-] Seeding failed:", res.stderr)
+    print("  [-] Seeding failed:", res.stderr or res.stdout)
     return False
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="SkillSync AI Demo Runner")
     parser.add_argument("--check-only", action="store_true", help="Only run health & migration checks")
+    parser.add_argument("--reset", action="store_true", help="Reset demo fixtures before seeding")
     args = parser.parse_args()
 
     print("=" * 60)
@@ -59,7 +64,7 @@ def main() -> None:
     if not check_backend_migrations():
         sys.exit(1)
 
-    if not seed_demo_data():
+    if not seed_demo_data(reset=args.reset):
         sys.exit(1)
 
     print("\n[+] Demo verification complete!")

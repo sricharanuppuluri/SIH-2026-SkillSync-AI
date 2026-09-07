@@ -23,7 +23,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--reset",
         action="store_true",
-        help="Drop all existing application data before seeding (DESTRUCTIVE).",
+        help="Drop demo transactional records before re-seeding.",
+    )
+    parser.add_argument(
+        "-y",
+        "--yes",
+        action="store_true",
+        help="Automatically confirm reset without interactive prompt.",
     )
     return parser.parse_args()
 
@@ -31,9 +37,9 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
 
-    if args.reset:
+    if args.reset and not args.yes:
         confirm = input(
-            "\n⚠️  WARNING: This will permanently DELETE all existing data and re-seed. "
+            "\n⚠️  WARNING: This will reset demo transactional data and re-seed. "
             "Type 'yes' to confirm: "
         )
         if confirm.strip().lower() != "yes":
@@ -41,8 +47,12 @@ def main() -> None:
             sys.exit(0)
 
     print("🌱 Running SkillSync AI demo seeder...")
+    cmd = ["uv", "run", "python", "-m", "app.db.seed"]
+    if args.reset:
+        cmd.append("--reset")
+
     result = subprocess.run(
-        ["uv", "run", "python", "-m", "app.db.seed"],
+        cmd,
         cwd=BACKEND_DIR,
         check=False,
     )
