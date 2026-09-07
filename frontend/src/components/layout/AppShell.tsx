@@ -22,7 +22,9 @@ export function AppShell({ children }: AppShellProps) {
   const [collapsed, setCollapsed] = React.useState<boolean>(false);
   const [mobileNavOpen, setMobileNavOpen] = React.useState<boolean>(false);
 
-  const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
+  const isPublicRoute =
+    PUBLIC_ROUTES.includes(pathname) ||
+    pathname.startsWith("/passport/share/");
 
   React.useEffect(() => {
     // In production browser, redirect unauthenticated users to /login on protected routes
@@ -82,7 +84,7 @@ export function AppShell({ children }: AppShellProps) {
 
         <footer className="border-t border-slate-800/80 bg-slate-950/40 py-5 text-center text-xs text-slate-500">
           <div className="max-w-7xl mx-auto px-4">
-            SkillSync AI &copy; {new Date().getFullYear()} — Free &amp; Open-Source Modular Monolith Ecosystem
+            SkillSync AI &copy; {new Date().getFullYear()} — SIH 2026 Release Candidate • Closed-Loop Skill Intelligence Ecosystem
           </div>
         </footer>
       </div>

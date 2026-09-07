@@ -116,8 +116,8 @@ jobs:
         working-directory: frontend
         run: npm test
 
-      - name: Vite — Production Build
+      - name: Next.js — Production Build
         working-directory: frontend
         env:
-          VITE_API_URL: http://localhost:8000
+          NEXT_PUBLIC_API_URL: http://localhost:8000
         run: npm run build
