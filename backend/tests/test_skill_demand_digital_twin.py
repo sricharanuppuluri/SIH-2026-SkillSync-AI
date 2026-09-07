@@ -32,16 +32,13 @@ Tests:
 """
 
 import uuid
-from datetime import UTC, datetime, timedelta
 
 import pytest
 from httpx import AsyncClient
 
 from app.core.database import AsyncSessionLocal
 from app.core.security import create_access_token, get_password_hash
-from app.models.candidate_skill import CandidateSkill, ProficiencyLevel
 from app.models.course import Course, CourseDifficulty, CourseMode, CourseSkill, CourseStatus
-from app.models.enrollment import Enrollment, EnrollmentStatus
 from app.models.job import EmploymentType, ExperienceLevel, Job, JobSkill, JobStatus
 from app.models.profiles import (
     CandidateProfile,
@@ -112,7 +109,9 @@ async def _make_user(role: UserRole, **kwargs) -> tuple[User, str]:
     return user, token
 
 
-async def _make_skill(name: str | None = None, skill_type: SkillType = SkillType.TECHNICAL) -> Skill:
+async def _make_skill(
+    name: str | None = None, skill_type: SkillType = SkillType.TECHNICAL
+) -> Skill:
     """Create a canonical skill and return it.
 
     A uuid suffix is always appended to prevent normalized_name collisions
@@ -121,7 +120,7 @@ async def _make_skill(name: str | None = None, skill_type: SkillType = SkillType
     async with AsyncSessionLocal() as session:
         # Always append a unique suffix so normalized_name is unique per run
         suffix = uuid.uuid4().hex[:8]
-        base = name or f"Skill"
+        base = name or "Skill"
         n = f"{base}_{suffix}"
         slug = n.lower().replace(" ", "-").replace("_", "-")
         normalized = n.upper().replace(" ", "_")
@@ -276,9 +275,9 @@ async def _make_verified_skill(
 async def _get_candidate_profile(user_id: uuid.UUID) -> CandidateProfile:
     async with AsyncSessionLocal() as session:
         result = await session.execute(
-            __import__("sqlalchemy", fromlist=["select"]).select(CandidateProfile).where(
-                CandidateProfile.user_id == user_id
-            )
+            __import__("sqlalchemy", fromlist=["select"])
+            .select(CandidateProfile)
+            .where(CandidateProfile.user_id == user_id)
         )
         return result.scalars().first()
 
@@ -306,17 +305,13 @@ async def test_overview_kpis_reflect_published_jobs_only(async_client: AsyncClie
     _, employer_profile, _ = await _make_employer_with_profile()
 
     # Create DRAFT job — should NOT count
-    draft_job = await _make_published_job(
-        employer_profile.id, [skill.id], status=JobStatus.DRAFT
-    )
+    await _make_published_job(employer_profile.id, [skill.id], status=JobStatus.DRAFT)
 
     resp1 = await async_client.get(f"{API}/overview")
     kpis1 = resp1.json()["kpis"]
 
     # Create PUBLISHED job — SHOULD count
-    pub_job = await _make_published_job(
-        employer_profile.id, [skill.id], status=JobStatus.PUBLISHED
-    )
+    await _make_published_job(employer_profile.id, [skill.id], status=JobStatus.PUBLISHED)
 
     resp2 = await async_client.get(f"{API}/overview")
     kpis2 = resp2.json()["kpis"]
@@ -712,9 +707,7 @@ async def test_skill_training_returns_only_published_active_courses(async_client
     _, tp_profile, _ = await _make_training_provider_with_profile()
 
     # Published active course — should appear
-    pub_course = await _make_course_for_skill(
-        tp_profile.id, skill.id, CourseStatus.PUBLISHED, True
-    )
+    pub_course = await _make_course_for_skill(tp_profile.id, skill.id, CourseStatus.PUBLISHED, True)
     # Draft course — should NOT appear
     await _make_course_for_skill(tp_profile.id, skill.id, CourseStatus.DRAFT, True)
 
@@ -737,9 +730,7 @@ async def test_closed_jobs_excluded_from_demand(async_client: AsyncClient):
     """Test 23: CLOSED jobs do not contribute to demand_count."""
     skill = await _make_skill("ClosedJobSkill23")
     _, employer_profile, _ = await _make_employer_with_profile()
-    closed_job = await _make_published_job(
-        employer_profile.id, [skill.id], status=JobStatus.CLOSED
-    )
+    await _make_published_job(employer_profile.id, [skill.id], status=JobStatus.CLOSED)
 
     _, token = await _make_user(UserRole.CANDIDATE)
     headers = {"Authorization": f"Bearer {token}"}

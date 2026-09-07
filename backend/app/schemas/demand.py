@@ -1,11 +1,9 @@
 """Pydantic schemas for the Phase 13 Skill Demand Digital Twin module."""
 
+import enum
 import uuid
-from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
-
-import enum
 
 
 class SkillShortageStatus(enum.StrEnum):
@@ -79,7 +77,9 @@ class SkillDemandSummaryItem(BaseModel):
     skill_name: str
     category: str | None = None
     skill_type: str | None = None
-    demand_count: int = Field(default=0, description="Number of active published jobs requiring this skill")
+    demand_count: int = Field(
+        default=0, description="Number of active published jobs requiring this skill"
+    )
     demand_share_percentage: float = Field(
         default=0.0, description="Percentage of total active jobs requiring this skill"
     )

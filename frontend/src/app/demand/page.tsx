@@ -9,7 +9,6 @@ import {
   CheckCircle2,
   Minus,
   Search,
-  Filter,
   RefreshCw,
   Briefcase,
   Users,
@@ -28,7 +27,6 @@ import type {
   DemandOverviewResponse,
   SkillDemandSummaryItem,
   SkillShortageStatus,
-  DemandListFilters,
 } from "@/types/demand";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -51,14 +49,6 @@ function shortageColor(status: SkillShortageStatus): string {
   }
 }
 
-function shortageGradient(status: SkillShortageStatus): string {
-  switch (status) {
-    case "HIGH_SHORTAGE": return "from-red-500/20 to-red-900/5 border-red-500/30";
-    case "MODERATE_SHORTAGE": return "from-orange-500/20 to-orange-900/5 border-orange-500/30";
-    case "BALANCED": return "from-green-500/20 to-green-900/5 border-green-500/30";
-    case "SURPLUS": return "from-blue-500/20 to-blue-900/5 border-blue-500/30";
-  }
-}
 
 function ShortageIcon({ status }: { status: SkillShortageStatus }) {
   switch (status) {
@@ -77,13 +67,11 @@ function KpiCard({
   icon: Icon,
   label,
   value,
-  iconColor,
   accent,
 }: {
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   label: string;
   value: string | number;
-  iconColor: string;
   accent: string;
 }) {
   return (
@@ -256,7 +244,6 @@ export default function DemandDashboardPage() {
   // Filters
   const [search, setSearch] = useState("");
   const [shortageFilter, setShortageFilter] = useState<SkillShortageStatus | "">("");
-  const [skillTypeFilter, setSkillTypeFilter] = useState("");
   const [sortDir, setSortDir] = useState<"desc" | "asc">("desc");
   const [activeTab, setActiveTab] = useState<"all" | "shortage" | "top">("all");
 
@@ -300,15 +287,10 @@ export default function DemandDashboardPage() {
     if (shortageFilter) {
       list = list.filter((s) => s.shortage_status === shortageFilter);
     }
-    if (skillTypeFilter) {
-      list = list.filter((s) =>
-        s.skill_type?.toLowerCase().includes(skillTypeFilter.toLowerCase())
-      );
-    }
     if (sortDir === "asc") list = list.sort((a, b) => a.demand_count - b.demand_count);
     else list = list.sort((a, b) => b.demand_count - a.demand_count);
     return list;
-  }, [skills, search, shortageFilter, skillTypeFilter, sortDir, activeTab]);
+  }, [skills, search, shortageFilter, sortDir, activeTab]);
 
   if (loading) {
     return (
@@ -493,11 +475,11 @@ export default function DemandDashboardPage() {
               marginBottom: "32px",
             }}
           >
-            <KpiCard icon={Briefcase} label="Active Published Jobs" value={kpis.total_active_jobs} iconColor="#8b5cf6" accent="#8b5cf6" />
-            <KpiCard icon={Zap} label="Skills In Demand" value={kpis.unique_skills_in_demand} iconColor="#6366f1" accent="#6366f1" />
-            <KpiCard icon={Users} label="Verified Candidates" value={kpis.verified_candidate_supply} iconColor="#22c55e" accent="#22c55e" />
-            <KpiCard icon={BookOpen} label="Training Courses" value={kpis.published_training_courses} iconColor="#3b82f6" accent="#3b82f6" />
-            <KpiCard icon={AlertTriangle} label="Skills in Shortage" value={kpis.skills_in_shortage} iconColor="#f97316" accent="#f97316" />
+            <KpiCard icon={Briefcase} label="Active Published Jobs" value={kpis.total_active_jobs} accent="#8b5cf6" />
+            <KpiCard icon={Zap} label="Skills In Demand" value={kpis.unique_skills_in_demand} accent="#6366f1" />
+            <KpiCard icon={Users} label="Verified Candidates" value={kpis.verified_candidate_supply} accent="#22c55e" />
+            <KpiCard icon={BookOpen} label="Training Courses" value={kpis.published_training_courses} accent="#3b82f6" />
+            <KpiCard icon={AlertTriangle} label="Skills in Shortage" value={kpis.skills_in_shortage} accent="#f97316" />
           </div>
         )}
 
@@ -567,7 +549,7 @@ export default function DemandDashboardPage() {
                 Critical Skill Shortages
               </h3>
               <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                {overview.highest_shortage_skills.map((s, i) => (
+                {overview.highest_shortage_skills.map((s) => (
                   <Link key={s.skill_id} href={`/demand/skills/${s.skill_id}`} style={{ textDecoration: "none" }}>
                     <div
                       style={{

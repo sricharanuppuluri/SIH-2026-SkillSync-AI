@@ -10,7 +10,7 @@ IMPORTANT:
 
 import uuid
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -84,15 +84,11 @@ async def list_skill_demand(
     skill_type: str | None = Query(
         default=None, description="Filter by skill type (TECHNICAL, SOFT, TOOL, etc.)"
     ),
-    industry: str | None = Query(
-        default=None, description="Filter by employer industry"
-    ),
-    location: str | None = Query(
-        default=None, description="Filter by job location city/state"
-    ),
+    industry: str | None = Query(default=None, description="Filter by employer industry"),
+    location: str | None = Query(default=None, description="Filter by job location city/state"),
     shortage_status: SkillShortageStatus | None = Query(
         default=None,
-        description="Filter by shortage classification (HIGH_SHORTAGE, MODERATE_SHORTAGE, BALANCED, SURPLUS)",
+        description="Filter by shortage classification",
     ),
     skip: int = Query(default=0, ge=0, description="Pagination offset"),
     limit: int = Query(default=50, ge=1, le=200, description="Page size"),

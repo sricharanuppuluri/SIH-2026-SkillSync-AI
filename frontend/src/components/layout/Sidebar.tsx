@@ -142,7 +142,13 @@ export const navItems: NavItem[] = [
     href: "/demand",
     icon: TrendingUp,
     status: "available",
-    phase: "Phase 13",
+  },
+  {
+    title: "Outcome Analytics",
+    href: "/analytics",
+    icon: BarChart3,
+    status: "coming-soon",
+    phase: "Phase 14",
   },
   {
     title: "Settings",

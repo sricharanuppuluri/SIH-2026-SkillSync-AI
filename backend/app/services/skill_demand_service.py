@@ -253,9 +253,9 @@ async def get_demand_overview(
     unique_skills_in_demand = (await db.scalar(unique_skills_q)) or 0
 
     # Distinct verified candidates (platform-wide)
-    verified_cands_q = select(
-        func.count(distinct(VerifiedSkill.candidate_id))
-    ).where(VerifiedSkill.verification_status == VerificationStatus.VERIFIED)
+    verified_cands_q = select(func.count(distinct(VerifiedSkill.candidate_id))).where(
+        VerifiedSkill.verification_status == VerificationStatus.VERIFIED
+    )
     verified_candidates = (await db.scalar(verified_cands_q)) or 0
 
     # Published courses
@@ -577,17 +577,15 @@ async def get_skill_demand_supply(
     """
     await _require_skill(db, skill_id)
 
-    verified_q = select(
-        func.count(distinct(VerifiedSkill.candidate_id))
-    ).where(
+    verified_q = select(func.count(distinct(VerifiedSkill.candidate_id))).where(
         VerifiedSkill.skill_id == skill_id,
         VerifiedSkill.verification_status == VerificationStatus.VERIFIED,
     )
     verified_count = (await db.scalar(verified_q)) or 0
 
-    declared_q = select(
-        func.count(distinct(CandidateSkill.candidate_id))
-    ).where(CandidateSkill.skill_id == skill_id)
+    declared_q = select(func.count(distinct(CandidateSkill.candidate_id))).where(
+        CandidateSkill.skill_id == skill_id
+    )
     declared_count = (await db.scalar(declared_q)) or 0
 
     unverified_count = max(declared_count - verified_count, 0)

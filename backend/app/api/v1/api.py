@@ -55,6 +55,4 @@ api_router.include_router(
 api_router.include_router(passport.router, tags=["Verified Skill Passport"])
 
 # Phase 13: Skill Demand Digital Twin Endpoints
-api_router.include_router(
-    demand.router, prefix="/demand", tags=["Skill Demand Digital Twin"]
-)
+api_router.include_router(demand.router, prefix="/demand", tags=["Skill Demand Digital Twin"])

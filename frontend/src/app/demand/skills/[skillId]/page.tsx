@@ -65,7 +65,7 @@ function StatCard({
   value,
   accent,
 }: {
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   label: string;
   value: string | number;
   accent: string;
@@ -108,7 +108,7 @@ function StatCard({
 
 function SectionTitle({ children, icon: Icon, accent = "#8b5cf6" }: {
   children: React.ReactNode;
-  icon?: React.ComponentType<{ className?: string }>;
+  icon?: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   accent?: string;
 }) {
   return (
