@@ -2,13 +2,14 @@ name: SkillSync AI CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, "feature/**"]
   pull_request:
     branches: [main, develop]
 
 jobs:
+  # ─── Backend: Lint, Format & Tests ─────────────────────────────────────────
   backend-checks:
-    name: Backend Lint & Tests
+    name: Backend Lint, Format & Tests
     runs-on: ubuntu-latest
 
     services:
@@ -52,32 +53,47 @@ jobs:
 
       - name: Install backend dependencies
         working-directory: backend
-        run: |
-          uv pip install --system -r requirements.txt
+        run: uv sync --frozen
 
-      - name: Run Ruff Lint
+      - name: Ruff — Lint Check
         working-directory: backend
-        run: |
-          ruff check .
+        run: uv run ruff check .
 
-      - name: Run Pytest
+      - name: Ruff — Format Check
+        working-directory: backend
+        run: uv run ruff format --check .
+
+      - name: Alembic — Verify Migration Head
         working-directory: backend
         env:
           APP_ENV: testing
           DATABASE_URL: postgresql+asyncpg://postgres:postgrespassword@localhost:5432/skillsync_test
           REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: ci-test-secret-key-not-for-production
         run: |
-          pytest -v
+          uv run alembic upgrade head
+          uv run alembic heads
+          uv run alembic current
 
+      - name: Pytest — Backend Test Suite
+        working-directory: backend
+        env:
+          APP_ENV: testing
+          DATABASE_URL: postgresql+asyncpg://postgres:postgrespassword@localhost:5432/skillsync_test
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: ci-test-secret-key-not-for-production
+        run: uv run pytest -v --tb=short
+
+  # ─── Frontend: Lint, Typecheck, Tests & Build ───────────────────────────────
   frontend-checks:
-    name: Frontend Lint, Typecheck & Build
+    name: Frontend Lint, Typecheck, Tests & Build
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Set up Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -88,19 +104,19 @@ jobs:
         working-directory: frontend
         run: npm ci
 
-      - name: Run ESLint
+      - name: ESLint — Lint Check
         working-directory: frontend
         run: npm run lint
 
-      - name: Run TypeScript validation
+      - name: TypeScript — Type Check
         working-directory: frontend
         run: npx tsc --noEmit
 
-      - name: Run Frontend Tests
+      - name: Vitest — Frontend Unit Tests
         working-directory: frontend
         run: npm test
 
-      - name: Build Next.js Application
+      - name: Next.js — Production Build
         working-directory: frontend
         env:
           NEXT_PUBLIC_API_URL: http://localhost:8000
