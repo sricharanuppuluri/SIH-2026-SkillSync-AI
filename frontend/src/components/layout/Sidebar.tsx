@@ -20,6 +20,7 @@ import {
   Bot,
   BookOpen,
   Sliders,
+  FileCheck,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -76,6 +77,12 @@ export const navItems: NavItem[] = [
     title: "Manage Jobs",
     href: "/employer/jobs",
     icon: Briefcase,
+    status: "available",
+  },
+  {
+    title: "Skill Contracts",
+    href: "/employer/contracts",
+    icon: FileCheck,
     status: "available",
   },
   {
@@ -186,6 +193,7 @@ export const ROLE_NAV_PERMISSIONS: Record<UserRole, string[]> = {
   EMPLOYER: [
     "/dashboard",
     "/employer/jobs",
+    "/employer/contracts",
     "/employer/applications",
     "/employer/profile",
     "/tools/skill-extractor",
@@ -225,6 +233,7 @@ export const ROLE_NAV_PERMISSIONS: Record<UserRole, string[]> = {
     "/candidate/education",
     "/candidate/learning",
     "/employer/jobs",
+    "/employer/contracts",
     "/employer/applications",
     "/employer/profile",
     "/training-provider/courses",

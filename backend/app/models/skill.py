@@ -24,6 +24,7 @@ if TYPE_CHECKING:
     from app.models.candidate_skill import CandidateSkill
     from app.models.course import CourseSkill
     from app.models.job import JobSkill
+    from app.models.skill_contract import SkillContractRequirement
     from app.models.skill_embedding import SkillEmbedding
     from app.models.skill_evidence import SkillEvidence
     from app.models.verified_skill import VerifiedSkill
@@ -148,6 +149,9 @@ class Skill(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     )
     verified_skills: Mapped[list["VerifiedSkill"]] = relationship(
         "VerifiedSkill", back_populates="skill", cascade="all, delete-orphan"
+    )
+    contract_requirements: Mapped[list["SkillContractRequirement"]] = relationship(
+        "SkillContractRequirement", back_populates="skill", cascade="all, delete-orphan"
     )
 
     def __repr__(self) -> str:

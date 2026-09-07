@@ -1,5 +1,6 @@
 export * from "./auth";
 export * from "./candidate";
+export * from "./contract";
 export * from "./copilot";
 export * from "./demand";
 export * from "./employer";
