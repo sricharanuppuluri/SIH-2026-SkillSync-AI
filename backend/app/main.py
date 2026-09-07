@@ -7,24 +7,29 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+import logging
+
 from app.api.v1.api import api_router
 from app.core.config import settings
 from app.core.database import engine
 from app.core.redis import close_redis_client
+from app.core.security_headers import SecurityHeadersMiddleware
+
+logger = logging.getLogger("skillsync")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Lifespan event handler for startup and graceful shutdown."""
     # Startup logic
-    print(f"[*] Starting {settings.APP_NAME} v{settings.VERSION} [{settings.APP_ENV}]")
+    logger.info("[*] Starting %s v%s [%s]", settings.APP_NAME, settings.VERSION, settings.APP_ENV)
     print(f"[*] API Documentation available at http://{settings.HOST}:{settings.PORT}/docs")
     yield
     # Shutdown logic
-    print("[*] Gracefully terminating application connections...")
+    logger.info("[*] Gracefully terminating application connections...")
     await close_redis_client()
     await engine.dispose()
-    print("[*] Shutdown complete.")
+    logger.info("[*] Shutdown complete.")
 
 
 app = FastAPI(
@@ -45,6 +50,24 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Configure HTTP Security Headers
+app.add_middleware(SecurityHeadersMiddleware)
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request, exc: Exception) -> JSONResponse:
+    """Safely catch unhandled internal exceptions to prevent leakage of internal system details."""
+    logger.error("Unhandled server exception on %s: %s", request.url.path, exc, exc_info=True)
+    if settings.DEBUG and settings.APP_ENV != "production":
+        return JSONResponse(
+            status_code=500,
+            content={"detail": str(exc)},
+        )
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "An internal server error occurred. Please contact system support."},
+    )
 
 # Mount Versioned API Routes
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)

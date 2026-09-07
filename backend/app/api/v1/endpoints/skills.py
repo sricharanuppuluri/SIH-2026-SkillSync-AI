@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.deps import get_optional_current_user, require_authenticated_user, require_roles
+from app.core.rate_limiter import rate_limit
 from app.models.skill import SkillStatus, SkillType
 from app.models.user import User, UserRole
 from app.schemas.semantic import (
@@ -388,6 +389,7 @@ async def delete_skill_relationship(
         "Requires authentication. Model and server configuration are server-side only. "
         "If Ollama is unavailable, returns success=false with appropriate warnings."
     ),
+    dependencies=[Depends(rate_limit(requests_per_minute=30))],
 )
 async def extract_skills_from_text(
     payload: SkillExtractionRequest,
@@ -425,6 +427,7 @@ async def extract_skills_from_text(
         "3. Local Sentence Transformers vector embedding similarity via pgvector. "
         "Requires authentication. Internal 384-dimensional vectors are never exposed."
     ),
+    dependencies=[Depends(rate_limit(requests_per_minute=60))],
 )
 async def semantic_skill_match(
     payload: SemanticMatchRequest,
