@@ -146,7 +146,7 @@ async def test_candidate_skill_lifecycle_and_validation(async_client: AsyncClien
     """Candidate can attach canonical skills, update proficiency, list, and delete."""
     user, profile, token = await create_candidate()
     headers = {"Authorization": f"Bearer {token}"}
-    skill = await create_canonical_skill(name=f"Python-{uuid.uuid4().hex[:4]}")
+    skill = await create_canonical_skill(name=f"Python-{uuid.uuid4().hex[:12]}")
 
     # 1. Attach skill
     attach_payload = {
@@ -456,8 +456,8 @@ async def test_candidate_dashboard_aggregation(async_client: AsyncClient) -> Non
     headers = {"Authorization": f"Bearer {token}"}
 
     # Add 2 skills
-    skill1 = await create_canonical_skill(name=f"SkillDash1-{uuid.uuid4().hex[:4]}")
-    skill2 = await create_canonical_skill(name=f"SkillDash2-{uuid.uuid4().hex[:4]}")
+    skill1 = await create_canonical_skill(name=f"SkillDash1-{uuid.uuid4().hex[:12]}")
+    skill2 = await create_canonical_skill(name=f"SkillDash2-{uuid.uuid4().hex[:12]}")
     await async_client.post(
         "/api/v1/candidate/skills",
         json={"skill_id": str(skill1.id), "proficiency": "INTERMEDIATE", "years_experience": 2.0},

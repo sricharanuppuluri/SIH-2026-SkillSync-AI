@@ -1,7 +1,7 @@
 # SkillSync_AI — Demo Environment Pre-Flight Checklist
 
 > **Smart India Hackathon 2026 — Pre-Demo Operations & Rig Checklist**  
-> **Platform Version**: `v1.0.0-RC` (Release Candidate, Commit: `e7fae90`)  
+> **Platform Version**: `v1.0.0-RC` (Release Candidate, Commit: `10fffe4`)  
 > **Status**: Run this checklist 30 minutes before every jury presentation.
 
 ---

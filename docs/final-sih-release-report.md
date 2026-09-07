@@ -66,7 +66,7 @@ Employment Retention ──> Employer Feedback ──> Provider PPI ──> Work
 | Step | Milestone | Verification Output | Status |
 | :--- | :--- | :--- | :---: |
 | **E2E-01** | Employer Job Creation | `POST /api/v1/jobs` with salary, location, remote, required skills | **PASS** |
-| **E2E-02** | Job → Skill Contract Binding | Legal terms, SLA days, tier constraints, guaranteed interviews | **PASS** |
+| **E2E-02** | Job → Skill Contract Binding | Structured competency requirements, proficiency levels, evidence types | **PASS** |
 | **E2E-03** | Demand Intelligence Aggregation | Time-decayed demand frequency, regional shortage index | **PASS** |
 | **E2E-04** | Demand Forecasting Model | 30/60/90-day linear projection + backtesting evaluation | **PASS** |
 | **E2E-05** | What-if Policy Simulator | Non-destructive perturbation, policy shocks (FDI, EV) | **PASS** |
@@ -76,7 +76,7 @@ Employment Retention ──> Employer Feedback ──> Provider PPI ──> Work
 | **E2E-09** | Course Curriculum & Lessons | Progressive module hierarchy, lesson sequencing | **PASS** |
 | **E2E-10** | Candidate Course Enrollment | Unique candidate-course enrollment state machine | **PASS** |
 | **E2E-11** | Course Completion & Assessment | Final exam scoring (≥70%), automated outcome certification | **PASS** |
-| **E2E-12** | Cryptographic Verified Passport | SHA-256 hash chaining, public token sharing, tamper-evident | **PASS** |
+| **E2E-12** | Verified Skill Passport | Deterministic evidence precedence, cryptographically secure share tokens | **PASS** |
 | **E2E-13** | AI Semantic Job Matching | pgvector cosine similarity + hybrid deterministic ranking | **PASS** |
 | **E2E-14** | Job Application Submission | Verified passport credentials bound to employer application | **PASS** |
 | **E2E-15** | Hiring & Placement Outcome | Offer generation, hired status transition, compensation recorded | **PASS** |
@@ -102,8 +102,8 @@ Employment Retention ──> Employer Feedback ──> Provider PPI ──> Work
    - When the local Ollama daemon is offline or cold-starting, skill extraction and career copilot automatically fall back to regex/heuristic tokenizers and predefined guidance templates within a bounded 1.5s/30s timeout.
 2. **Vector Space Scale:**
    - Embeddings use `all-MiniLM-L6-v2` (384 dimensions) indexed via PostgreSQL `pgvector` HNSW/IVFFlat. For high-concurrency production deployments (>10,000 requests/sec), an external vector indexer or dedicated embedding microservice is recommended.
-3. **Passport Verification External Anchor:**
-   - Passports utilize cryptographic SHA-256 hash chains stored in PostgreSQL with public token verification. For an institutional government rollout, an on-chain smart contract or IndiaStack credential anchor can be attached without modifying domain entities.
+3. **Passport Verification External Anchor**:
+   - Passports utilize deterministic evidence-based verification stored in PostgreSQL with cryptographically secure public token sharing. For an institutional government rollout, an on-chain smart contract or IndiaStack credential anchor (DigiLocker/APAAR) can be attached without modifying domain entities.
 
 ---
 

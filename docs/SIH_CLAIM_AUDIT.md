@@ -1,0 +1,46 @@
+# SkillSync_AI — SIH Technical Claim Audit Matrix
+
+> **Smart India Hackathon 2026 — Factual Audit Against Source Code & Test Suite**  
+> **Repository Ground Truth**: Commit `10fffe4`  
+> **Principle**: Remove every unsupported, exaggerated, or contradictory claim. Ensure absolute credibility before evaluators.
+
+---
+
+## 1. Technical Claim Verification Table
+
+| Technical Domain | Source File in Repository | Ground Truth Implementation | Initial Documentation Claim | Audit Verdict | Presentation Wording |
+| :--- | :--- | :--- | :--- | :---: | :--- |
+| **Provider Performance Index (PPI)** | `backend/app/services/outcome_service.py` (lines 40–88) | $\text{PPI} = 0.25\,\text{Comp} + 0.35\,\text{Place} + 0.20\,\text{Ret} + 0.20\,\text{EmpRating}$ | $0.40P + 0.35R + 0.25S$ | **CORRECTED** | "Deterministic 4-factor formula: $0.25\,\text{Completion} + 0.35\,\text{Placement} + 0.20\,\text{90d Retention} + 0.20\,\text{Employer Rating}$." |
+| **Skill Passport Verification** | `backend/app/services/verified_skill_service.py` (lines 48–250) | Rule-based evidence precedence (Certification > Course Completion > Assessment > Resume > Declaration). Zero self-declared bypass. | "SHA-256 cryptographic hash chaining" | **CORRECTED** | "Deterministic, evidence-backed Verified Skill Passport with cryptographically secure public share tokens (`secrets.token_urlsafe(32)`)." |
+| **Passport Public Sharing** | `backend/app/services/verified_skill_service.py` (lines 602–650) | `secrets.token_urlsafe(32)` public token lookup without login. | "Public verification URL with hash verification" | **VERIFIED** | "Cryptographically secure public share tokens accessible without login (`/passport/share/[token]`)." |
+| **Skill Contract Binding** | `backend/app/models/skill_contract.py` (lines 56–140) | Versioned `SkillContract` and `SkillContractRequirement` with proficiency, importance, and evidence prerequisites. | "Legally enforceable contract with 5-day interview turnaround SLA guarantee" | **CORRECTED** | "Structured, versioned competency contract defining required proficiency, importance weights, and evidence prerequisites." |
+| **Demand Forecasting Model** | `backend/app/services/demand_forecast_service.py` (lines 78–145) | Holt Linear Exponential Smoothing (`statsmodels.tsa.api.Holt`) for $n \ge 6$, Linear Trend Regression for $3 \le n < 6$, Baseline Fallback for $n < 3$. | "Holt-Winters time-series model" | **CORRECTED** | "Holt Linear Exponential Smoothing and Linear Trend Regression with backtested Mean Absolute Error (MAE)." |
+| **Embedding Model** | `backend/app/core/config.py` (line 37) & `backend/app/services/embedding_service.py` | `sentence-transformers/all-MiniLM-L6-v2` loaded locally via SentenceTransformer. | `all-MiniLM-L6-v2` | **VERIFIED** | "`sentence-transformers/all-MiniLM-L6-v2` generating 384-dimensional dense vectors." |
+| **Vector Dimension** | `backend/app/core/config.py` (line 38) | `EMBEDDING_DIMENSION: int = 384` | 384 dimensions | **VERIFIED** | "384-dimensional dense vector embeddings." |
+| **Vector Index & Similarity** | `backend/app/services/semantic_skill_service.py` & PostgreSQL | Cosine similarity via dot product of unit-normalized vectors in `pgvector`. Strong threshold: 0.85, Match threshold: 0.70. | Cosine similarity in pgvector | **VERIFIED** | "Cosine similarity in PostgreSQL `pgvector` with 0.70 match and 0.85 strong match thresholds." |
+| **Skill Gap Alignment Score** | `backend/app/services/skill_gap_service.py` (lines 348–355) | $\text{Score} = \left(\frac{\text{matched} \times 1.0 + \text{partial} \times 0.5}{\text{total}}\right) \times 100$ | Match score | **VERIFIED** | "Deterministic alignment score: $\frac{\text{matched} \times 1.0 + \text{partial} \times 0.5}{\text{total}} \times 100$." |
+| **Local AI Model** | `backend/app/core/config.py` (line 32) & `app/ai/ollama_client.py` | Default configured: `mistral:latest`. User-configurable via `OLLAMA_MODEL` environment variable. | "Llama 3 / DeepSeek-R1" | **CORRECTED** | "Local Ollama LLM (default `mistral:latest`, configurable via environment variables)." |
+| **AI Timeouts & Fallback** | `backend/app/ai/ollama_client.py` (lines 65, 126) | 1.5s timeout on health diagnostics; 30.0s timeout on generation with fallback to deterministic heuristic parsing. | "1.5s circuit breaker timeout on all AI" | **CORRECTED** | "1.5s timeout on connection health diagnostics; 30s bounded timeout on LLM inference with fallback to regex/heuristic tokenizers." |
+| **Prompt Injection Defense** | `backend/app/services/career_copilot_service.py` (lines 36–59) | Rigid operational system prompt rules: user input treated as untrusted data, database authority enforced, strict JSON schema output. | Prompt injection defense | **VERIFIED** | "Strict system prompt delimitation, untrusted input isolation, and strict JSON schema validation." |
+| **Security: JWT & RBAC** | `backend/app/core/security.py` & `backend/app/api/deps.py` | JWT `HS256` tokens with role claims: `CANDIDATE`, `EMPLOYER`, `TRAINING_PROVIDER`, `GOVERNMENT`, `ADMIN`. | JWT & RBAC | **VERIFIED** | "Stateless JWT authentication (`HS256`) with strict 5-tier role-based access control." |
+| **Security: Ownership & IDOR** | `backend/app/api/deps.py` & domain services | Scoped database queries enforcing `user_id` and `organization_id` ownership on every mutation. | IDOR protection | **VERIFIED** | "Ownership-scoped database queries verifying authenticated identity on all sensitive endpoints." |
+| **Security: Headers & Middleware** | `backend/app/core/security_headers.py` & `app/main.py` | `SecurityHeadersMiddleware` adding X-Content-Type-Options, X-Frame-Options, HSTS, and CORS middleware. | Security headers | **VERIFIED** | "Built-in security headers middleware and configurable CORS origins." |
+| **Test Coverage Baseline** | Test runners (`uv run pytest`, `npx vitest run`) | Backend: 244/244 passed. Frontend: 131/131 passed across 32 files. Next.js routes: 38 compiled. | 244 backend / 131 frontend | **VERIFIED** | "244 automated backend tests and 131 frontend tests passing 100%." |
+| **Recruiter Screening Metric** | Industry contextual data | No measured empirical field study; demo scenario based on national industry reports. | "70% reduction in recruiter screening time" | **CORRECTED** | "Illustrative target based on industry benchmarks: streamlines screening by replacing unverified resumes with pre-verified skill evidence." |
+| **Graduate Employability Metric** | Industry contextual data (Wheebox / India Skills Report) | Macro educational context, not measured by local platform code. | "Over 50% employability deficit" | **CORRECTED** | "Contextual industry statistic cited from national employability studies (e.g., India Skills Report)." |
+| **Scalability Infrastructure** | `backend/app/core/database.py` & `docker-compose.yml` | Currently running asynchronous SQLAlchemy 2.0 connection pool with local Redis cache. | "pgBouncer, read replicas, Celery workers active" | **CORRECTED** | "Currently: async SQLAlchemy connection pooling and Redis cache. Production scaling path: pgBouncer, database read replicas, and distributed task queues." |
+| **Licensing & Platform Cost** | Project dependencies (`pyproject.toml`, `package.json`) | All software components are open-source with permissive licenses (MIT, BSD, PostgreSQL License). | "100% free platform" | **CORRECTED** | "100% open-source software stack avoiding commercial API licensing fees, while server hosting and infrastructure costs apply." |
+
+---
+
+## 2. Summary of Corrections Applied to Presentation Material
+
+1. **Corrected PPI Formula**: Replaced the assumed $0.40P + 0.35R + 0.25S$ with the authentic 4-part formula:
+   $$\text{PPI} = (0.25 \times \text{Completion}) + (0.35 \times \text{Placement}) + (0.20 \times \text{90d Retention}) + (0.20 \times \text{Employer Rating})$$
+2. **Corrected Passport Claim**: Replaced "SHA-256 hash chaining" with "Deterministic, evidence-backed Verified Skill Passport with cryptographically secure public share tokens (`secrets.token_urlsafe(32)`)".
+3. **Corrected Skill Contract Claim**: Replaced "legally enforceable contract with guaranteed 5-day interview turnaround" with "structured competency contract defining required proficiency, importance weights, and evidence prerequisites".
+4. **Corrected Forecasting Model**: Replaced "Holt-Winters" with "Holt Linear Exponential Smoothing and Linear Trend Regression with backtested Mean Absolute Error (MAE)".
+5. **Corrected AI Model & Timeouts**: Specified default configured model as `mistral:latest` (configurable via `OLLAMA_MODEL`), with 1.5s healthcheck timeout and 30s generation timeout with deterministic regex/heuristic fallback.
+6. **Framed Metrics Accurately**: Labeled candidate match scores (e.g., 94%) and retention figures (e.g., 92%) as *illustrative demo dataset scenarios*, avoiding unsupported claims of empirical production field measurements.
+7. **Framed Scalability Accurately**: Distinguished the current high-performance modular monolith from the *production scaling path* (pgBouncer, read replicas, Celery).
+8. **Framed Cost Accurately**: Clarified that the *software stack* is open-source and free of commercial API licenses, while cloud infrastructure and server hosting costs naturally apply.

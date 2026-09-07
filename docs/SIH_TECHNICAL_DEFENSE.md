@@ -1,14 +1,14 @@
 # SkillSync_AI — Technical Architecture & Engineering Defense
 
-> **Smart India Hackathon 2026 — Comprehensive Engineering & Deep Technical Defense**  
-> **Platform Version**: `v1.0.0-RC` (Release Candidate, Commit: `e7fae90`)  
+> **Smart India Hackathon 2026 — Comprehensive Engineering & Technical Defense**  
+> **Platform Version**: `v1.0.0-RC` (Release Candidate, Commit: `10fffe4`)  
 > **Architecture Style**: Local-First, Highly Cohesive Modular Monolith
 
 ---
 
-## 1. Executive Architectural Overview
+## 1. Architectural Overview
 
-SkillSync_AI is engineered as a high-performance **modular monolith** that unifies relational data, cryptographic credentials, semantic vector search, and local AI inference into an autonomous, closed-loop skill intelligence ecosystem.
+SkillSync_AI is structured as a **modular monolith** that unifies relational data, competency credentials, semantic vector search, and local AI inference into an integrated, feedback-driven skill intelligence ecosystem.
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────┐
@@ -22,9 +22,9 @@ SkillSync_AI is engineered as a high-performance **modular monolith** that unifi
 │   ┌────────────────────────────────────────────────────────────────┐   │
 │   │                      Domain Services Layer                     │   │
 │   │  • Auth & RBAC        • Canonical Skill Taxonomy               │   │
-│   │  • Employer & Jobs    • Skill Contracts & SLAs                 │   │
+│   │  • Employer & Jobs    • Skill Contracts                        │   │
 │   │  • Candidate & Resume • Skill Gap Engine                       │   │
-│   │  • Training Supply    • Cryptographic Skill Passport           │   │
+│   │  • Training Supply    • Verified Skill Passport                │   │
 │   │  • Demand Twin        • Forecasting & What-If Simulator        │   │
 │   │  • Semantic Matching  • Outcomes, Retention & Provider PPI     │   │
 │   └────────────────────────────────┬───────────────────────────────┘   │
@@ -35,128 +35,135 @@ SkillSync_AI is engineered as a high-performance **modular monolith** that unifi
          ▼                                                       ▼
 ┌─────────────────────────────────┐             ┌────────────────────────────────┐
 │     PostgreSQL 16 + pgvector    │             │       Local AI Engine          │
-│  • Relational Schema (ACID)     │             │  • Ollama (Open-Weight LLMs)   │
+│  • Relational Schema (ACID)     │             │  • Ollama (mistral:latest def) │
 │  • 384-d Vector Embeddings      │             │  • Sentence Transformers       │
-│  • HNSW / IVFFlat Vector Index  │             │    (all-MiniLM-L6-v2)          │
-│  • Cryptographic Hash Records   │             │  • Bounded Timeouts (1.5s/30s) │
-│  • Linear Alembic Migrations    │             │  • Heuristic Regex Fallback    │
+│  • Cosine Similarity Search     │             │    (all-MiniLM-L6-v2)          │
+│  • Linear Alembic Migrations    │             │  • Bounded Timeouts (1.5s/30s) │
+│  • Single Head: 0012            │             │  • Heuristic Regex Fallback    │
 └─────────────────────────────────┘             └────────────────────────────────┘
 ```
 
 ---
 
-## 2. Deep-Dive: Core Engineering Decisions
+## 2. Core Architectural Decisions
 
 ### 2.1 Why a Modular Monolith over Microservices?
-1. **Zero Distributed Transaction Complexity**: The closed-loop ecosystem spans 18 interrelated milestones. When a student completes a course, that event triggers: (1) assessment grade persistence, (2) cryptographic passport minting, (3) skill gap recomputation, and (4) job match index updates. In a microservices architecture, this requires distributed 2-phase commits or complex Saga orchestrators with eventual consistency lag. In our modular monolith, these execute within atomic ACID transactions in PostgreSQL.
-2. **Sub-Millisecond In-Process Communication**: Domain services call each other via asynchronous in-memory interfaces rather than high-latency HTTP/gRPC network hops.
-3. **Turnkey Deployment**: One containerized deployable package for simple deployment in institutional datacenters without requiring a dedicated Kubernetes cluster.
+1. **Atomic Transactional Integrity**: The closed-loop ecosystem spans 18 interrelated milestones. When a student completes a course, that event triggers: (1) enrollment status persistence, (2) evidence creation, (3) verified skill recalculation, and (4) job match updates. In a microservices architecture, this requires distributed transactions or eventual consistency patterns. In our modular monolith, these execute within atomic ACID transactions in PostgreSQL.
+2. **Low Communication Overhead**: Domain services interact via asynchronous Python interfaces rather than multi-hop HTTP/gRPC network calls.
+3. **Operational Simplicity**: A single deployable containerized package simplifies evaluation and deployment in institutional environments.
 
 ### 2.2 Why PostgreSQL 16 + pgvector over Separate Vector Databases?
-1. **Single Source of Truth**: External vector databases (e.g., Pinecone, Milvus, Qdrant) require dual-writing from PostgreSQL. If a job is deleted in PostgreSQL, an asynchronous worker must synchronize the vector store, creating eventual consistency gaps and data drift.
-2. **Hybrid Unified Queries**: With `pgvector`, we can run single, elegant SQL queries combining relational predicates with vector similarity:
+1. **Single Source of Truth**: External vector databases (e.g., Pinecone, Milvus) require dual-writing from PostgreSQL. If an entity is updated or deleted, asynchronous sync workers must manage eventual consistency.
+2. **Unified Relational and Vector Queries**: With `pgvector`, we execute single queries that filter records using standard relational conditions while ranking results by vector similarity:
    ```sql
-   SELECT c.id, c.full_name,
-          1 - (cs.embedding <=> :job_requirement_vector) AS cosine_similarity
-   FROM candidates c
+   SELECT c.id, c.headline,
+          1 - (cs.embedding <=> :target_skill_vector) AS cosine_similarity
+   FROM candidate_profiles c
    JOIN candidate_skills cs ON c.id = cs.candidate_id
-   JOIN verified_passports vp ON cs.skill_id = vp.skill_id AND vp.is_valid = TRUE
+   JOIN verified_skills vs ON cs.skill_id = vs.skill_id AND vs.verification_status = 'VERIFIED'
    WHERE c.is_active = TRUE
-     AND c.preferred_location = :location
    ORDER BY cosine_similarity DESC
    LIMIT 20;
    ```
-3. **Cost & Sovereignty**: Zero SaaS licensing fees; runs within standard PostgreSQL hosting.
+3. **Open-Source & Self-Hostable**: Avoids external cloud vendor dependencies and commercial subscription fees.
 
 ### 2.3 Why Local AI (Ollama) over Commercial Cloud APIs?
-1. **Candidate Data Sovereignty**: Transmitting student resumes, employment histories, and salary benchmarks to OpenAI or Anthropic violates Indian data protection principles (DPDP Act). Local Ollama inference ensures zero citizen PII ever leaves the server.
-2. **Zero Marginal Operating Cost**: Parsing 100,000 resumes on cloud APIs costs $3,000+. On local hardware, it costs $0.00 in API fees.
-3. **Deterministic Offline Resilience**: Even in air-gapped test environments or during internet outages, local AI continues executing.
+1. **Citizen Data Privacy**: Processing candidate resumes and career records locally prevents sensitive personal data from traversing commercial third-party servers.
+2. **Zero Commercial API Dependencies**: Running local inference avoids recurring per-token cloud API costs.
+3. **Predictable Operation**: The system remains functional without requiring external internet connectivity.
 
 ---
 
-## 3. Pragmatic AI Architecture: AI vs. Deterministic Governance
+## 3. Pragmatic AI Architecture: AI Assistance vs. Deterministic Governance
 
-To prevent hallucination and maintain absolute legal and financial integrity, SkillSync_AI enforces a strict separation between **probabilistic AI assistance** and **authoritative deterministic rules**:
+SkillSync_AI strictly separates **probabilistic AI assistance** from **authoritative deterministic rules**:
 
 | Ecosystem Domain | Probabilistic AI / ML Component | Authoritative Deterministic Component | Rationale & Safety Boundary |
 | :--- | :--- | :--- | :--- |
-| **Skill Extraction** | Local LLM extracts raw skill strings from resumes and job descriptions | Canonical Skill Taxonomy Resolver maps strings strictly to database IDs via alias lookup | LLMs propose skill labels, but only canonical, verified database skills are recorded. |
-| **Semantic Matching** | Sentence Transformers generate dense 384-dimensional semantic vectors | Cosine distance scored in pgvector with verified passport weight multipliers (+20%) | Vectors bridge vocabulary gaps, but verified credentials deterministically boost ranking. |
-| **Career Copilot** | LLM generates conversational career advice and lesson suggestions | Prompt templates grounded strictly in active job requirements; 1.5s timeout circuit breaker | AI advises, but cannot modify database state or guarantee interviews. |
-| **Demand Forecasting** | Holt-Winters exponential smoothing & linear trend time-series models | Aggregated historical job postings, rolling standard deviation confidence bounds | Statistical mathematics replaces subjective guesswork; bounded by historical variance. |
-| **Skill Contracts** | None | Cryptographic database record with SLA turnaround and legally binding terms | Zero AI involvement. Contract terms are legally binding database commitments. |
-| **Skill Passport** | None | SHA-256 hash chaining: $\text{Hash}_n = \text{SHA256}(\text{Data} + \text{Hash}_{n-1})$ | Zero AI involvement. Cryptographic proof guaranteed by mathematics. |
-| **Provider PPI** | None | Mathematical composite index: $\text{PPI} = 0.40P + 0.35R + 0.25S$ | Zero AI involvement. Institute rankings reflect audited database outcomes. |
+| **Skill Extraction** | Local LLM extracts raw candidate skill strings from text | Canonical Skill Taxonomy Resolver maps strings strictly to database IDs via alias lookups | AI proposes skill labels, but only canonical, database-backed skills are recorded. |
+| **Semantic Matching** | Sentence Transformers (`all-MiniLM-L6-v2`) generate 384-d vectors | Cosine distance scored in pgvector with verified credential weight multipliers (+20%) | Vectors bridge vocabulary gaps, while verified evidence deterministically boosts rank. |
+| **Career Copilot** | LLM generates contextual advice grounded in database facts | Prompt templates grounded in active job requirements; 1.5s circuit breaker on health checks | AI advises the student, but cannot mutate database records or grant credentials. |
+| **Demand Forecasting** | Holt exponential smoothing & linear trend time-series models | Aggregated historical job postings, rolling standard deviation confidence bounds | Statistical mathematics replaces subjective guesswork; bounded by historical variance. |
+| **Skill Contracts** | None | Versioned database record with proficiency levels and evidence types | Zero AI involvement. Formal, versioned competency specification. |
+| **Skill Passport** | None | Deterministic evidence precedence (Certification > Course > Assessment > Declaration) | Zero AI involvement. Credential status is governed strictly by verifiable evidence. |
+| **Provider PPI** | None | Deterministic formula: $0.25\,\text{Comp} + 0.35\,\text{Place} + 0.20\,\text{Ret} + 0.20\,\text{EmpRating}$ | Zero AI involvement. Provider ratings reflect audited database outcomes. |
 
 ---
 
-## 4. Cryptographic Verified Skill Passport Engine
+## 4. Verified Skill Passport Engine
 
-### 4.1 Immutable Chaining Mechanism
-When a candidate passes an accredited course assessment (≥70%), the backend mints a verified credential:
-$$\text{Payload} = \{\text{candidate\_id}, \text{skill\_id}, \text{provider\_id}, \text{score}, \text{timestamp}, \text{prev\_hash}\}$$
-$$\text{Current Hash} = \text{SHA-256}(\text{JSON}(\text{Payload}))$$
+### 4.1 Evidence-Backed Verification Hierarchy
+Implemented in `backend/app/services/verified_skill_service.py`, verification is rule-driven:
+- `EvidenceType.CERTIFICATION` ➔ `VERIFIED`
+- `EvidenceType.COURSE_COMPLETION` (100% curriculum of published course) ➔ `VERIFIED`
+- `EvidenceType.ASSESSMENT` ➔ `VERIFIED`
+- `EvidenceType.RESUME_EXTRACTION` ➔ `UNVERIFIED`
+- `EvidenceType.CANDIDATE_DECLARATION` ➔ `UNVERIFIED`
 
-### 4.2 Tamper Evidence & Verification
-- The resulting hash is permanently anchored in the `verified_passports` table with a public UUID `share_token`.
-- When an employer or judge navigates to `/passport/share/[token]`, the server validates the hash chain against stored parameters. If a malicious actor alters a candidate's score or skill level in the database directly, the calculated hash mismatches, and the verification status displays `INVALID / TAMPERED`.
+Self-declarations and unverified extractions never grant verified status.
+
+### 4.2 Secure Public Sharing
+- Public sharing is managed using cryptographically secure tokens generated via `secrets.token_urlsafe(32)`.
+- When an external evaluator accesses `/passport/share/[token]`, the platform returns a read-only view of verified competencies without exposing private contact details or requiring user login.
 
 ---
 
 ## 5. Demand Forecasting & Policy Simulation Algorithms
 
 ### 5.1 Demand Forecasting Model
-The forecasting engine evaluates skill signals over 30, 60, and 90-day time horizons:
-1. **Decomposition**: Time series is decomposed into baseline level ($L_t$), trend velocity ($T_t$), and seasonal components ($S_t$).
-2. **Backtesting & Accuracy**: Computes Mean Absolute Error (MAE) against recent 30-day historical actuals, displaying backtested confidence metrics directly on government dashboards.
+Implemented in `backend/app/services/demand_forecast_service.py`:
+1. **Holt Linear Exponential Smoothing**: Used when $n \ge 6$ historical monthly observations exist (`statsmodels.tsa.api.Holt` with `smoothing_level=0.4, smoothing_trend=0.2`).
+2. **Linear Trend Regression**: Used when $3 \le n < 6$ observations exist via `np.polyfit`.
+3. **Baseline Fallback**: Used for sparse history ($n < 3$) using recent rolling averages.
+4. **Accuracy Metrics**: Backtested Mean Absolute Error (MAE) and 95% confidence bounds are computed and displayed on government dashboards.
 
 ### 5.2 What-If Policy Simulation Mechanics
-1. **In-Memory Non-Destructive Clones**: When a planner runs a simulation, live tables are never mutated. State vectors are cloned into transient memory.
-2. **Perturbation Propagation**: Applying a policy vector (e.g., $+20\%$ EV manufacturing incentive) multiplies baseline demand for associated skills using a cross-elasticity coefficient matrix.
-3. **Side-by-Side Delta**: The engine outputs baseline vs. simulated deltas, highlighting impending regional shortages.
+1. **In-Memory Non-Destructive Execution**: When a policy simulation runs, operational database tables are never mutated. State vectors are evaluated in transient memory.
+2. **Perturbation Propagation**: Sectoral policy shocks apply multiplier vectors across canonical skills.
+3. **Side-by-Side Comparison**: Outputs baseline historical metrics alongside simulated projections across 30, 60, and 90-day horizons.
 
 ---
 
 ## 6. Outcome Intelligence & Provider Performance Index (PPI)
 
 ### 6.1 Mathematical Formulation
-The closed loop measures post-hiring success at 30, 60, and 90-day intervals:
-$$\text{PPI} = (0.40 \times P) + (0.35 \times R_{90}) + (0.25 \times S_{\text{employer}})$$
-- $P$ (**Placement Rate**): $\frac{\text{Verified Hires}}{\text{Certified Course Graduates}}$
-- $R_{90}$ (**90-Day Retention Rate**): $\frac{\text{Candidates Retained at 90 Days}}{\text{Total Verified Hires}}$
-- $S_{\text{employer}}$ (**Employer Satisfaction Score**): Normalized average 1-to-5 star rating on real-world competency.
+Implemented in `backend/app/services/outcome_service.py` (lines 40–88):
+$$\text{PPI} = (0.25 \times \text{Comp}) + (0.35 \times \text{Place}) + (0.20 \times \text{Ret}_{90\text{d}}) + (0.20 \times \text{EmpRating})$$
+- $\text{Comp}$ (**Completion Rate**): Course completion percentage (0–100).
+- $\text{Place}$ (**Placement Rate**): Verified placements divided by certified course graduates (0–100).
+- $\text{Ret}_{90\text{d}}$ (**90-Day Retention Rate**): Percentage of placed candidates retaining employment at 90 days (0–100).
+- $\text{EmpRating}$ (**Normalized Employer Rating**): $(\frac{\text{Average Rating}}{5.0}) \times 100$.
 
-### 6.2 Feedback Ingestion
-High PPI scores dynamically increase a training provider's visibility in candidate course discovery and update government subsidy eligibility algorithms.
-
----
-
-## 7. Security, Authorization & Privacy Defense
-
-1. **Strict RBAC & Token-Bound IDOR Protection**:
-   - Access tokens use cryptographically signed JWTs (`HS256`).
-   - Every API query validates that `current_user.id` or `current_user.organization_id` strictly matches the targeted resource.
-2. **Password Security**: Bcrypt with salt rounds for all user credentials.
-3. **Prompt Injection Defense**:
-   - User inputs to the Career Copilot are treated as untrusted data strings within rigid delimiters.
-   - Copilot operates with zero database write permissions.
-4. **Security Headers & Sanitization**:
-   - HSTS, X-Content-Type-Options, X-Frame-Options, and strict CORS origins.
-   - Pydantic v2 sanitizes inputs, preventing SQL injection and XSS payloads.
+### 6.2 Performance Tiers
+- $\ge 85.0$: **Tier 1 (Excellent)**
+- $\ge 70.0$: **Tier 2 (Proficient)**
+- $\ge 50.0$: **Tier 3 (Developing)**
+- $< 50.0$: **Tier 4 (Needs Improvement)**
 
 ---
 
-## 8. Scalability & Performance Benchmarks
+## 7. Security Architecture & Controls
 
-### 8.1 Production Build & Test Validation
-- **Backend Test Suite**: **244 / 244 passed** (0 failures, 100% pass rate).
-- **Frontend Test Suite**: **131 / 131 passed** across 32 test files.
-- **Frontend Compilation**: **38 Next.js routes** statically and dynamically compiled.
-- **Lint & Types**: 0 Ruff warnings, 0 ESLint warnings, 0 TypeScript errors.
+1. **Authentication & Authorization**:
+   - Stateless JWT tokens signed with `HS256` (24-hour validity).
+   - Role-Based Access Control enforcing role boundaries: `CANDIDATE`, `EMPLOYER`, `TRAINING_PROVIDER`, `GOVERNMENT`, `ADMIN`.
+2. **IDOR Protection**:
+   - Database queries are scoped by authenticated `user_id` and organization ID, preventing unauthorized cross-tenant data access.
+3. **Password Security**:
+   - Bcrypt hashing with salt rounds for user credentials.
+4. **Defense-in-Depth**:
+   - Pydantic v2 input validation sanitizing query inputs.
+   - Built-in `SecurityHeadersMiddleware` adding X-Content-Type-Options, X-Frame-Options, and HSTS.
+   - Configurable CORS origin filtering.
 
-### 8.2 Production Scale Strategy
-- **API Statelessness**: FastAPI instances run statelessly behind NGINX or AWS ALB.
-- **Database Concurrency**: PostgreSQL with pgBouncer connection pooling supports 10,000+ concurrent connections.
-- **Read Replicas**: High-volume public passport verifications and demand heatmaps can be routed to read replicas.
-- **Background Tasks**: Redis-backed Celery workers handle heavy embedding generation and resume parsing asynchronously.
+---
+
+## 8. Scalability: Current Architecture vs. Production Roadmap
+
+| Dimension | Current Implementation (`v1.0.0-RC`) | Production Scaling Roadmap |
+| :--- | :--- | :--- |
+| **API Layer** | Single-instance asynchronous FastAPI | Horizontal API instances behind NGINX / ALB |
+| **Database** | PostgreSQL 16 + pgvector with asyncpg pooling | pgBouncer connection pool + read replicas for analytics |
+| **Caching** | Redis 7 local cache for rate limits | Distributed Redis cluster |
+| **Heavy Tasks** | In-process asynchronous task execution | Distributed Celery workers for batch embeddings |
+| **Inference** | Local Ollama daemon (`mistral:latest` default) | Dedicated GPU inference cluster / vLLM service |

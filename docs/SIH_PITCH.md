@@ -1,67 +1,63 @@
 # SkillSync_AI — Pitch Deck & Executive Speeches
 
-> **Smart India Hackathon 2026 — Final Presentation & Pitch Reference**  
-> Problem Statement: AI-Powered Closed-Loop Skill Intelligence & Workforce Ecosystem
+> **Smart India Hackathon 2026 — Factual Evaluator Pitch Reference**  
+> **Repository Baseline**: Verified against actual source code and test suite (`v1.0.0-RC`)
 
 ---
 
 ## 1. One-Line Pitch
 
-> **"SkillSync_AI is an AI-powered closed-loop skill ecosystem that connects industry demand, canonical skill intelligence, training supply, verified competency, employment, and post-placement retention into an autonomous feedback loop for workforce planning."**
+> **"SkillSync_AI is an AI-powered closed-loop skill ecosystem connecting industry demand, skill intelligence, training, verified competency, employment, and workforce outcomes."**
 
 ---
 
 ## 2. 30-Second Elevator Pitch
 
-> *"Today, industry demand evolves in weeks, but workforce education lags by years because jobs, skills, training, and government planning operate in disconnected silos. Self-declared resumes create hiring friction, and training institutes have zero visibility into real post-placement outcomes.*
->
-> *SkillSync_AI solves this by closing the loop. When an employer publishes a job, our AI extracts and binds structured competency requirements into an enforceable Skill Contract. Government planners instantly see live shortage signals and 90-day demand forecasts. Candidates discover their exact skill gaps, enroll in targeted courses, and earn tamper-evident, cryptographically verified Skill Passports. Employers hire pre-verified talent, and post-placement retention scores feed directly back into training provider ratings and policy simulations.*
->
-> *We don't just match candidates to jobs—we make the entire national skill economy self-correcting."*
+> *"SkillSync_AI addresses the persistent gap between industry demand, workforce skills, training, and employment. Employers define structured competency requirements, the platform converts demand into skill intelligence, candidates identify their skill gaps and training pathways, completed competencies are verified through an evidence-backed Skill Passport, and semantic matching connects qualified candidates with relevant opportunities. Post-employment outcomes and employer feedback then feed back into workforce and training intelligence. The key innovation is that SkillSync_AI connects the entire lifecycle into a continuous feedback loop instead of stopping at either job matching or course completion."*
 
 ---
 
 ## 3. 2-Minute Pitch
 
-### Problem (0:00–0:25)
-"Respected judges, India produces over 1.5 million engineers and graduates every year, yet industry reports show that over 50% face severe employability gaps. Why? Because our talent pipeline is fundamentally fragmented:
-1. **Employers** write vague, unstructured job descriptions with unrealistic wishlists.
-2. **Candidates** present unverified, self-declared resumes that recruiters spend weeks filtering.
-3. **Training providers** teach curricula designed years ago, disconnected from regional market demand.
-4. **Government policymakers** make multi-crore skilling investments based on lagging annual surveys rather than real-time data."
+### Problem & Context (0:00–0:25)
+"Respected judges, industry reports highlight that a substantial portion of university graduates face critical employability gaps when entering technical roles. The core issue is that our talent pipeline operates in disconnected silos:
+1. **Employers** publish unstructured job descriptions that struggle to define granular competency requirements.
+2. **Candidates** present self-declared resumes that require extensive manual screening by recruiters.
+3. **Training providers** develop curricula with limited real-time visibility into market skill demand.
+4. **Workforce planners** allocate training resources based on periodic surveys rather than real-time demand signals."
 
-### Solution & Closed Loop (0:25–1:00)
-"SkillSync_AI replaces these disconnected silos with a single **closed-loop skill intelligence ecosystem**:
-- **Employer Competency Binding**: When an employer posts a job, our local AI extracts skills and binds them to an authoritative canonical taxonomy. Employers can issue **Skill Contracts** that legally commit to interview or hire candidates who reach verified benchmark scores.
-- **Demand Intelligence & Forecasting**: Every job and contract feeds a live digital twin of regional skill shortages, generating 30/60/90-day predictive forecasts and allowing governments to run **What-If Policy Simulations** (such as testing the impact of a 20% EV subsidy on power electronics demand).
-- **Targeted Training & Verification**: Candidates receive instant personalized skill gap analyses against live market roles. Training providers offer modular curricula to close those gaps. Upon assessment completion, candidates receive a **Cryptographically Verified Skill Passport** anchored with SHA-256 hash chaining."
+### Solution & The Closed Loop (0:25–1:00)
+"SkillSync_AI connects these stakeholders into a single **closed-loop skill intelligence ecosystem**:
+- **Structured Competency Definition**: When an employer posts a job, the system extracts required skills, maps them to a canonical taxonomy, and enables versioned **Skill Contracts** that specify required proficiency levels, importance weights, and verifiable evidence types.
+- **Demand Intelligence & Forecasting**: Job postings feed a live digital twin of regional skill demand, generating statistical time-series forecasts using Holt exponential smoothing and linear trend models. Planners can run **What-If Simulations** to model policy scenarios non-destructively.
+- **Targeted Training & Evidence Verification**: Candidates receive instant, quantitative skill gap analyses against target jobs and can enroll directly into mapped courses. As candidates complete courses and assessments, the platform generates an evidence-backed **Verified Skill Passport** with cryptographically secure public share tokens."
 
-### Innovation & AI Reality (1:00–1:35)
-"What makes SkillSync_AI truly innovative is our pragmatic AI architecture:
-- We use **local AI (Ollama)** for resume and job skill extraction, meaning zero vendor API lock-in, low operating cost, and candidate data privacy.
-- We utilize **PostgreSQL `pgvector` with 384-dimensional embeddings** to achieve semantic skill matching—recognizing that 'REST API design' and 'FastAPI backend development' are semantically aligned even when exact keywords differ.
-- Crucially, **AI assists intelligence, but deterministic rules govern decisions**: tamper-proof passport verification, legal contract bounds, and Provider Performance Indexes are strictly database-backed and hallucination-free."
+### Pragmatic AI & Engineering Foundation (1:00–1:35)
+"Our technical implementation emphasizes pragmatic, sovereign, and verifiable engineering:
+- We support **local AI inference via Ollama** for skill extraction and conversational guidance, avoiding mandatory commercial API dependencies and keeping candidate data on sovereign infrastructure.
+- We utilize **PostgreSQL `pgvector` with 384-dimensional Sentence Transformer embeddings** (`all-MiniLM-L6-v2`) to provide semantic skill matching that bridges vocabulary differences.
+- Crucially, **AI assists intelligence, but deterministic rules govern decisions**: skill taxonomy mapping, gap scoring, passport verification, and provider ratings are strictly computed by database-backed logic."
 
-### Outcomes & Impact (1:35–2:00)
-"Most platforms end when a candidate clicks 'Apply'. SkillSync_AI tracks the full lifecycle:
-- 30, 60, and 90-day **employment retention tracking**.
-- Structured **employer competency feedback**.
-- An automated **Provider Performance Index (PPI)** that ranks training institutes based on real hiring and retention outcomes.
-- High-performing providers are highlighted to government agencies, while lagging curricula are flagged for modernization.
+### Outcomes & Ecosystem Feedback (1:35–2:00)
+"Rather than terminating at job matching or course completion, SkillSync_AI captures post-placement milestones:
+- It tracks **30, 60, and 90-day employment retention**.
+- It collects structured **employer competency feedback**.
+- It computes a deterministic **Provider Performance Index (PPI)** combining course completion rate (25%), placement rate (35%), 90-day retention rate (20%), and employer satisfaction (20%).
+- High-performing providers gain greater prominence, while lagging curricula are highlighted for modernization.
 
-SkillSync_AI transforms workforce skilling from an open-ended guess into a verifiable, closed-loop science."
+SkillSync_AI transforms workforce development into an accountable, feedback-driven ecosystem."
 
 ---
 
 ## 4. Final Closing Statements
 
 ### 10-Second Closing
-> *"SkillSync_AI connects industry demand to skills, skills to training, training to verified competency, employment to retention, and outcomes back into national workforce intelligence."*
+> *"SkillSync_AI connects industry demand to skills, skills to training, training to verified competency, employment to retention, and outcomes back into workforce intelligence."*
 
 ### 30-Second Closing
-> *"Traditional job portals measure clicks; traditional LMSs measure completions. SkillSync_AI measures real-world competency and post-placement retention. By closing the loop between industry demand and training accountability, SkillSync_AI empowers candidates with verifiable credentials, employers with trusted talent, and governments with predictive workforce intelligence. Thank you."*
+> *"Traditional job portals measure clicks; traditional LMSs measure completions. SkillSync_AI connects both with verified competency and post-placement retention tracking. By closing the loop between industry demand, training delivery, and employment outcomes, SkillSync_AI provides candidates with verifiable credentials, employers with qualified talent, and planners with actionable workforce intelligence. Thank you."*
 
 ### 60-Second Closing
-> *"To build an economically competitive nation, our workforce development must be as agile and data-driven as our fastest-growing industries. Today, we have demonstrated that SkillSync_AI is not just a concept or a UI prototype—it is an end-to-end, production-ready release candidate (`v1.0.0-RC`) with 244 automated backend tests, 131 frontend tests, and 18 fully integrated closed-loop milestones.*
+> *"Building an agile talent ecosystem requires data-driven coordination across education, industry, and government. SkillSync_AI is not merely a conceptual design—it is an audited release candidate (`v1.0.0-RC`) backed by 244 automated backend tests, 131 frontend tests, and 38 compiled Next.js routes.
 >
-> *From the moment TechNova posts a job requirement to the moment an accredited training provider's rating increases because their graduate achieved 90-day job retention, every step is verified, transparent, and self-correcting. We invite you to join us in bringing verified competency and predictive intelligence to India's national workforce. Thank you, and we look forward to your questions."*
+> From structured job skill contracts to 90-day retention tracking and transparent provider performance indexing, every stage in the ecosystem is verifiable and accountable. Built on a modern open-source stack that avoids commercial API dependencies, SkillSync_AI provides the technical foundation for evidence-based workforce development. Thank you, and we welcome your questions."*
