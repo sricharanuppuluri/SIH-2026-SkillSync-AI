@@ -7,7 +7,9 @@ import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { SystemStatus } from "@/components/dashboard/SystemStatus";
 import { QuickActions } from "@/components/dashboard/QuickActions";
+import { CandidateDashboard } from "@/components/candidate/CandidateDashboard";
 import { EmployerDashboard } from "@/components/employer/EmployerDashboard";
+import TrainingProviderDashboardPage from "@/app/training-provider/dashboard/page";
 import { LoadingState } from "@/components/ui/LoadingState";
 
 export default function DashboardPage() {
@@ -59,6 +61,16 @@ export default function DashboardPage() {
   // If authenticated as EMPLOYER, render dedicated live Employer Dashboard
   if (user?.role === "EMPLOYER") {
     return <EmployerDashboard />;
+  }
+
+  // If authenticated as CANDIDATE, render dedicated live Candidate Dashboard
+  if (user?.role === "CANDIDATE") {
+    return <CandidateDashboard />;
+  }
+
+  // If authenticated as TRAINING_PROVIDER, redirect or render Training Provider Dashboard
+  if (user?.role === "TRAINING_PROVIDER") {
+    return <TrainingProviderDashboardPage />;
   }
 
   return (

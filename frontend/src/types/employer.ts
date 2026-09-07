@@ -29,6 +29,7 @@ export interface JobSkill {
 export interface Job {
   id: string;
   employer_id: string;
+  employer_name?: string | null;
   title: string;
   description: string;
   location_city?: string | null;

@@ -14,6 +14,7 @@ from app.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 
 if TYPE_CHECKING:
     from app.models.course import Course
+    from app.models.enrollment_progress import EnrollmentLessonProgress
     from app.models.profiles import CandidateProfile
 
 
@@ -61,6 +62,9 @@ class Enrollment(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         "CandidateProfile", back_populates="enrollments"
     )
     course: Mapped["Course"] = relationship("Course", back_populates="enrollments")
+    lesson_progress: Mapped[list["EnrollmentLessonProgress"]] = relationship(
+        "EnrollmentLessonProgress", back_populates="enrollment", cascade="all, delete-orphan"
+    )
 
     def __repr__(self) -> str:
         return (

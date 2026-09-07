@@ -1,4 +1,4 @@
-"""Skill taxonomy and canonical intelligence endpoints."""
+"""Skill taxonomy, canonical intelligence, and AI extraction endpoints."""
 
 import uuid
 
@@ -7,9 +7,14 @@ from sqlalchemy import inspect
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.core.deps import get_optional_current_user, require_roles
+from app.core.deps import get_optional_current_user, require_authenticated_user, require_roles
 from app.models.skill import SkillStatus, SkillType
 from app.models.user import User, UserRole
+from app.schemas.semantic import (
+    EmbeddingStatusResponse,
+    SemanticMatchRequest,
+    SemanticMatchResponse,
+)
 from app.schemas.skill import (
     SkillAliasCreate,
     SkillAliasResponse,
@@ -21,7 +26,9 @@ from app.schemas.skill import (
     SkillResponse,
     SkillUpdate,
 )
-from app.services import skill_service
+from app.schemas.skill_extraction import SkillExtractionRequest, SkillExtractionResponse
+from app.services import skill_extraction_service, skill_service
+from app.services.semantic_skill_service import semantic_skill_service
 
 router = APIRouter()
 
@@ -363,3 +370,83 @@ async def delete_skill_relationship(
 ) -> None:
     """Delete a skill relationship. Restricted to ADMIN."""
     await skill_service.delete_skill_relationship(db, skill_id, relationship_id)
+
+
+# ---------------------------------------------------------------------------
+# Phase 6: Local AI Skill Extraction
+# ---------------------------------------------------------------------------
+
+
+@router.post(
+    "/extract",
+    response_model=SkillExtractionResponse,
+    summary="Extract skills from text using local AI (Phase 6)",
+    description=(
+        "Accepts unstructured source text (job description, resume, course description, etc.) "
+        "and uses a locally running Ollama LLM to extract skill mentions. "
+        "Results are deterministically resolved against the canonical Phase 5 skill catalog. "
+        "Requires authentication. Model and server configuration are server-side only. "
+        "If Ollama is unavailable, returns success=false with appropriate warnings."
+    ),
+)
+async def extract_skills_from_text(
+    payload: SkillExtractionRequest,
+    db: AsyncSession = Depends(get_db),
+    _current_user: User = Depends(require_authenticated_user),
+) -> SkillExtractionResponse:
+    """Extract skills from source text using the local Ollama LLM.
+
+    Accessible to all authenticated roles: ADMIN, EMPLOYER, CANDIDATE,
+    TRAINING_PROVIDER, GOVERNMENT.
+
+    The Ollama model and base URL are server-side configuration only.
+    The caller cannot override the model or endpoint.
+    """
+    return await skill_extraction_service.extract_skills(
+        db=db,
+        text=payload.text,
+        source_type=payload.source_type,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Phase 9: Embeddings & Semantic Skill Matching
+# ---------------------------------------------------------------------------
+
+
+@router.post(
+    "/semantic-match",
+    response_model=SemanticMatchResponse,
+    summary="Semantic skill matching with exact/alias precedence (Phase 9)",
+    description=(
+        "Matches raw skill text against canonical skills using multi-tier resolution: "
+        "1. Exact canonical name match (1.0), "
+        "2. Canonical alias match (1.0), "
+        "3. Local Sentence Transformers vector embedding similarity via pgvector. "
+        "Requires authentication. Internal 384-dimensional vectors are never exposed."
+    ),
+)
+async def semantic_skill_match(
+    payload: SemanticMatchRequest,
+    db: AsyncSession = Depends(get_db),
+    _current_user: User = Depends(require_authenticated_user),
+) -> SemanticMatchResponse:
+    """Find matching canonical skills for query text using multi-tier resolution.
+
+    Accessible to all authenticated roles: CANDIDATE, EMPLOYER,
+    TRAINING_PROVIDER, GOVERNMENT, ADMIN.
+    """
+    return await semantic_skill_service.match_skill(db=db, request=payload)
+
+
+@router.get(
+    "/embeddings/status",
+    response_model=EmbeddingStatusResponse,
+    summary="Get canonical skill embedding status and coverage metrics (Admin only)",
+)
+async def get_embeddings_status(
+    db: AsyncSession = Depends(get_db),
+    _user: User = Depends(require_roles(UserRole.ADMIN)),
+) -> EmbeddingStatusResponse:
+    """Retrieve catalog embedding coverage and model health. Restricted to ADMIN."""
+    return await semantic_skill_service.get_embedding_status(db=db)

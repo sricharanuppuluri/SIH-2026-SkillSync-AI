@@ -277,6 +277,8 @@ export const skillsAPI = {
   },
 };
 
+export const skillTaxonomyAPI = skillsAPI;
+
 /**
  * Employer Portal API methods.
  */
@@ -396,3 +398,38 @@ export const employerAPI = {
     });
   },
 };
+
+/**
+ * Public Job Requisition API methods.
+ */
+export const jobAPI = {
+  async listJobs(): Promise<import("@/types").Job[]> {
+    return fetchAPI<import("@/types").Job[]>("/api/v1/jobs");
+  },
+
+  async getJob(jobId: string): Promise<import("@/types").Job> {
+    return fetchAPI<import("@/types").Job>(`/api/v1/jobs/${jobId}`);
+  },
+};
+
+/**
+ * Semantic Skill Matching and Embedding API methods (Phase 9).
+ */
+export const semanticSkillAPI = {
+  async match(
+    payload: import("@/types").SemanticMatchRequest
+  ): Promise<import("@/types").SemanticMatchResponse> {
+    return fetchAPI<import("@/types").SemanticMatchResponse>("/api/v1/skills/semantic-match", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async getStatus(): Promise<import("@/types").EmbeddingStatusResponse> {
+    return fetchAPI<import("@/types").EmbeddingStatusResponse>("/api/v1/skills/embeddings/status");
+  },
+};
+
+export * from "./trainingApi";
+export * from "./passportApi";
+

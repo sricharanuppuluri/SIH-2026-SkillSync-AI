@@ -31,6 +31,17 @@ class Settings(BaseSettings):
     OLLAMA_BASE_URL: str = "http://localhost:11434"
     OLLAMA_MODEL: str = "mistral:latest"
     OLLAMA_EMBEDDING_MODEL: str = "nomic-embed-text:latest"
+    OLLAMA_TIMEOUT: float = 30.0  # seconds
+
+    # Embeddings & Semantic Matching
+    EMBEDDING_MODEL_NAME: str = "sentence-transformers/all-MiniLM-L6-v2"
+    EMBEDDING_DIMENSION: int = 384
+    SEMANTIC_MATCH_THRESHOLD: float = 0.70
+    SEMANTIC_STRONG_MATCH_THRESHOLD: float = 0.85
+
+    # Skill extraction limits
+    EXTRACTION_MAX_TEXT_LENGTH: int = 10000  # characters
+    EXTRACTION_MIN_TEXT_LENGTH: int = 10  # characters
 
     # CORS Origins (comma-separated string or list)
     CORS_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000"

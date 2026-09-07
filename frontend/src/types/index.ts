@@ -1,6 +1,14 @@
 export * from "./auth";
+export * from "./candidate";
+export * from "./copilot";
+export * from "./demand";
 export * from "./employer";
+export * from "./extraction";
+export * from "./passport";
+export * from "./semantic";
 export * from "./skill";
+export * from "./skillGap";
+export * from "./training";
 
 export interface DatabaseHealth {
   status: "connected" | "disconnected" | "degraded";

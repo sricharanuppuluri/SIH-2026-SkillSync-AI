@@ -1,9 +1,10 @@
 """Role-specific profile domain models."""
 
 import uuid
+from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Float, ForeignKey, String, Text
+from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -11,11 +12,17 @@ from app.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 
 if TYPE_CHECKING:
     from app.models.application import Application
+    from app.models.candidate_education import CandidateEducation
+    from app.models.candidate_experience import CandidateExperience
     from app.models.candidate_skill import CandidateSkill
+    from app.models.copilot_conversation import CopilotConversation
     from app.models.course import Course
     from app.models.enrollment import Enrollment
     from app.models.job import Job
+    from app.models.passport_share import SkillPassportShare
+    from app.models.skill_evidence import SkillEvidence
     from app.models.user import User
+    from app.models.verified_skill import VerifiedSkill
 
 
 class CandidateProfile(Base, UUIDPrimaryKeyMixin, TimestampMixin):
@@ -32,21 +39,51 @@ class CandidateProfile(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     )
     headline: Mapped[str | None] = mapped_column(String(255), nullable=True)
     bio: Mapped[str | None] = mapped_column(Text, nullable=True)
+    current_role: Mapped[str | None] = mapped_column(String(100), nullable=True)
     experience_years: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
     education_level: Mapped[str | None] = mapped_column(String(100), nullable=True)
     location_city: Mapped[str | None] = mapped_column(String(100), index=True, nullable=True)
     location_state: Mapped[str | None] = mapped_column(String(100), index=True, nullable=True)
+
+    # Resume metadata & content
+    resume_filename: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    resume_file_size: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    resume_uploaded_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    resume_text: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Relationships
     user: Mapped["User"] = relationship("User", back_populates="candidate_profile")
     skills: Mapped[list["CandidateSkill"]] = relationship(
         "CandidateSkill", back_populates="candidate", cascade="all, delete-orphan"
     )
+    educations: Mapped[list["CandidateEducation"]] = relationship(
+        "CandidateEducation", back_populates="candidate", cascade="all, delete-orphan"
+    )
+    experiences: Mapped[list["CandidateExperience"]] = relationship(
+        "CandidateExperience", back_populates="candidate", cascade="all, delete-orphan"
+    )
     applications: Mapped[list["Application"]] = relationship(
         "Application", back_populates="candidate", cascade="all, delete-orphan"
     )
     enrollments: Mapped[list["Enrollment"]] = relationship(
         "Enrollment", back_populates="candidate", cascade="all, delete-orphan"
+    )
+    copilot_conversations: Mapped[list["CopilotConversation"]] = relationship(
+        "CopilotConversation", back_populates="candidate", cascade="all, delete-orphan"
+    )
+    skill_evidences: Mapped[list["SkillEvidence"]] = relationship(
+        "SkillEvidence", back_populates="candidate", cascade="all, delete-orphan"
+    )
+    verified_skills: Mapped[list["VerifiedSkill"]] = relationship(
+        "VerifiedSkill", back_populates="candidate", cascade="all, delete-orphan"
+    )
+    passport_share: Mapped["SkillPassportShare | None"] = relationship(
+        "SkillPassportShare",
+        back_populates="candidate",
+        cascade="all, delete-orphan",
+        uselist=False,
     )
 
     def __repr__(self) -> str:
@@ -95,6 +132,7 @@ class TrainingProviderProfile(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         nullable=False,
     )
     institution_name: Mapped[str] = mapped_column(String(255), index=True, nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
     provider_type: Mapped[str | None] = mapped_column(String(100), nullable=True)
     location_city: Mapped[str | None] = mapped_column(String(100), nullable=True)
     location_state: Mapped[str | None] = mapped_column(String(100), nullable=True)

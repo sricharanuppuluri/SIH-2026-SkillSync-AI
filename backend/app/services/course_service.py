@@ -21,10 +21,14 @@ async def get_courses(
     skip: int = 0,
     limit: int = 100,
 ) -> Sequence[Course]:
-    """List courses with eager loading of taught skills."""
+    """List courses with eager loading of taught skills and curriculum."""
     query = (
         select(Course)
-        .options(selectinload(Course.skills))
+        .options(
+            selectinload(Course.skills),
+            selectinload(Course.curriculum_modules),
+            selectinload(Course.enrollments),
+        )
         .offset(skip)
         .limit(limit)
         .order_by(Course.created_at.desc())
@@ -39,8 +43,16 @@ async def get_courses(
 
 
 async def get_course_by_id(db: AsyncSession, course_id: uuid.UUID) -> Course | None:
-    """Fetch course by UUID with eager loaded skills."""
-    query = select(Course).options(selectinload(Course.skills)).where(Course.id == course_id)
+    """Fetch course by UUID with eager loaded skills and curriculum."""
+    query = (
+        select(Course)
+        .options(
+            selectinload(Course.skills),
+            selectinload(Course.curriculum_modules),
+            selectinload(Course.enrollments),
+        )
+        .where(Course.id == course_id)
+    )
     result = await db.execute(query)
     return result.scalars().first()
 
